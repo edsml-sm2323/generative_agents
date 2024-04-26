@@ -1,3 +1,6 @@
+# Temporarily remove simulation files
+environment/frontend_server/temp_storage/
+
 reverie/backend_server/utils.py
 frontend_server/settings/local.py
 storage/*
