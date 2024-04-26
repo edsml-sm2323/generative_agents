@@ -27,6 +27,7 @@ import math
 import os
 import shutil
 import traceback
+import argparse
 
 from selenium import webdriver
 
@@ -605,8 +606,29 @@ if __name__ == '__main__':
   #                    "July1_the_ville_isabella_maria_klaus-step-3-21")
   # rs.open_server()
 
-  origin = input("Enter the name of the forked simulation: ").strip()
-  target = input("Enter the name of the new simulation: ").strip()
+  # Pars input params
+  parser = argparse.ArgumentParser(description='Reverie Server')
+  parser.add_argument(
+    '--origin',
+    type=str,
+    default="base_the_ville_isabella_maria_klaus",
+    help='The name of the forked simulation'
+  )
+  parser.add_argument(
+    '--target',
+    type=str,
+    default="test-simulation",
+    help='The name of the new simulation'
+  )
+  
+  origin = parser.parse_args().origin
+  target = parser.parse_args().target
+  
+  print(f"Origin: {origin}")
+  print(f"Target: {target}")
+                      
+  # origin = input("Enter the name of the forked simulation: ").strip()
+  # target = input("Enter the name of the new simulation: ").strip()
 
   rs = ReverieServer(origin, target)
   rs.open_server()
