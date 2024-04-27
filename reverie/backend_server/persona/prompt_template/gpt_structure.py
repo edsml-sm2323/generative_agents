@@ -5,13 +5,38 @@ File: gpt_structure.py
 Description: Wrapper functions for calling OpenAI APIs.
 """
 import json
-import random
 import openai
 import time 
 
 from utils import *
 
+from openai_cost_logger import OpenAICostLogger
+from openai_cost_logger import DEFAULT_LOG_PATH
+import threading
+
 openai.api_key = openai_api_key
+exp_name = "simulacra-test-1"
+cost_upperbound = 10
+
+cost_logger = OpenAICostLogger(
+    experiment_name = exp_name,
+    log_folder = DEFAULT_LOG_PATH,
+    cost_upperbound = cost_upperbound
+)
+lock = threading.Lock()  # Lock to ensure thread safety when updating the cost logger.
+
+def update_cost_logger(response: dict, input_cost: float, output_cost: float = 0) -> None:
+  """
+  Update the cost logger with the cost of the response.
+  
+  Args:
+    response (dict): The response from the OpenAI API.
+    input_cost (float): The cost of the input to the API.
+    output_cost (float. Optional): The cost of the output from the API. Defaults to 0.
+  """ 
+  # Need to acquire the lock since the cost_logger is shared among threads.
+  with lock:
+    cost_logger.update_cost(response=response, input_cost=input_cost, output_cost=output_cost)
 
 def temp_sleep(seconds=0.1):
   time.sleep(seconds)
@@ -23,8 +48,8 @@ def ChatGPT_single_request(prompt):
     model="gpt-3.5-turbo", 
     messages=[{"role": "user", "content": prompt}]
   )
+  update_cost_logger(completion, input_cost=0.5, output_cost=1.5)
   return completion["choices"][0]["message"]["content"]
-
 
 # ============================================================================
 # #####################[SECTION 1: CHATGPT-3 STRUCTURE] ######################
@@ -49,6 +74,7 @@ def GPT4_request(prompt):
     model="gpt-4", 
     messages=[{"role": "user", "content": prompt}]
     )
+    update_cost_logger(completion, input_cost=30.0, output_cost=60.0)
     return completion["choices"][0]["message"]["content"]
   
   except: 
@@ -74,6 +100,7 @@ def ChatGPT_request(prompt):
     model="gpt-3.5-turbo", 
     messages=[{"role": "user", "content": prompt}]
     )
+    update_cost_logger(completion, input_cost=0.5, output_cost=1.5)
     return completion["choices"][0]["message"]["content"]
   
   except: 
@@ -145,10 +172,6 @@ def ChatGPT_safe_generate_response(prompt,
       end_index = curr_gpt_response.rfind('}') + 1
       curr_gpt_response = curr_gpt_response[:end_index]
       curr_gpt_response = json.loads(curr_gpt_response)["output"]
-
-      # print ("---ashdfaf")
-      # print (curr_gpt_response)
-      # print ("000asdfhia")
       
       if func_validate(curr_gpt_response, prompt=prompt): 
         return func_clean_up(curr_gpt_response, prompt=prompt)
@@ -218,6 +241,7 @@ def GPT_request(prompt, gpt_parameter):
                 presence_penalty=gpt_parameter["presence_penalty"],
                 stream=gpt_parameter["stream"],
                 stop=gpt_parameter["stop"],)
+    update_cost_logger(response=response, input_cost=0.5, output_cost=1.5)
     return response.choices[0].text
   except: 
     print ("TOKEN LIMIT EXCEEDED")
@@ -277,8 +301,9 @@ def get_embedding(text, model="text-embedding-ada-002"):
   text = text.replace("\n", " ")
   if not text: 
     text = "this is blank"
-  return openai.Embedding.create(
-          input=[text], model=model)['data'][0]['embedding']
+  response = openai.Embedding.create(input=[text], model=model)
+  update_cost_logger(response=response, input_cost=0.1, output_cost=0.0)
+  return response['data'][0]['embedding']
 
 
 if __name__ == '__main__':
@@ -309,8 +334,6 @@ if __name__ == '__main__':
                                  True)
 
   print (output)
-
-
 
 
 
