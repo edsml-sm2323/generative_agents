@@ -1,6 +1,13 @@
 # Temporarily remove simulation files
 environment/frontend_server/temp_storage/
 
+# OpenAI API key
+reverie/backend_server/persona/prompt_template/openai_config.json
+
+environment/frontend_server/storage/*
+environment/frontend_server/temp_storage/*
+reverie/backend_server/cost-logs/*
+
 reverie/backend_server/utils.py
 frontend_server/settings/local.py
 storage/*
