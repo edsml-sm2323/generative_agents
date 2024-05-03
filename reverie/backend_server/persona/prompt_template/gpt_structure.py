@@ -6,14 +6,13 @@ Description: Wrapper functions for calling OpenAI APIs.
 """
 import time 
 import json
-import threading
 from pathlib import Path
-from openai import OpenAI, AzureOpenAI
+from openai import AzureOpenAI
 
 from utils import *
 
-from openai_cost_logger import OpenAICostLogger
 from openai_cost_logger import DEFAULT_LOG_PATH
+from persona.prompt_template.openai_logger_singleton import OpenAICostLogger_Singleton
 
 # Read OpenAI config.
 config_path = Path("./persona/prompt_template/openai_config.json")
@@ -35,27 +34,13 @@ embeddings_client = AzureOpenAI(
 )
 
 # Setup cost logger.
-exp_name = "simulacra-test-1"
+exp_name = "simulacra-test"
 cost_upperbound = 1
-cost_logger = OpenAICostLogger(
+cost_logger = OpenAICostLogger_Singleton(
     experiment_name = exp_name,
     log_folder = DEFAULT_LOG_PATH,
     cost_upperbound = cost_upperbound
 )
-lock = threading.Lock()  # Lock to ensure thread safety when updating the cost logger.
-
-def update_cost_logger(response: dict, input_cost: float, output_cost: float = 0) -> None:
-  """
-  Update the cost logger with the cost of the response.
-  
-  Args:
-    response (dict): The response from the OpenAI API.
-    input_cost (float): The cost of the input to the API.
-    output_cost (float. Optional): The cost of the output from the API. Defaults to 0.
-  """ 
-  # Need to acquire the lock since the cost_logger is shared among threads.
-  with lock:
-    cost_logger.update_cost(response=response, input_cost=input_cost, output_cost=output_cost)
 
 def temp_sleep(seconds=0.1):
   time.sleep(seconds)
@@ -66,7 +51,7 @@ def ChatGPT_single_request(prompt):
     model=openai_config["model"],
     messages=[{"role": "user", "content": prompt}]
   )
-  update_cost_logger(completion, input_cost=openai_config["model-costs"]["input"], output_cost=openai_config["model-costs"]["output"])
+  cost_logger.update_cost(completion, input_cost=openai_config["model-costs"]["input"], output_cost=openai_config["model-costs"]["output"])
   return completion.choices[0].message.content
 
 # ============================================================================
@@ -118,7 +103,7 @@ def ChatGPT_request(prompt):
     model=openai_config["model"],
     messages=[{"role": "user", "content": prompt}]
     )
-    update_cost_logger(completion, input_cost=openai_config["model-costs"]["input"], output_cost=openai_config["model-costs"]["output"])
+    cost_logger.update_cost(completion, input_cost=openai_config["model-costs"]["input"], output_cost=openai_config["model-costs"]["output"])
     return completion.choices[0].message.content
   
   except: 
@@ -262,7 +247,7 @@ def GPT_request(prompt, gpt_parameter):
                 presence_penalty=gpt_parameter["presence_penalty"],
                 stream=gpt_parameter["stream"],
                 stop=gpt_parameter["stop"],)
-    update_cost_logger(response=response, input_cost=openai_config["model-costs"]["input"], output_cost=openai_config["model-costs"]["output"])
+    cost_logger.update_cost(response=response, input_cost=openai_config["model-costs"]["input"], output_cost=openai_config["model-costs"]["output"])
     return response.choices[0].message.content
   except Exception as e:
     print(f"Error: {e}")
@@ -325,7 +310,7 @@ def get_embedding(text, model=openai_config["embeddings"]):
   if not text: 
     text = "this is blank"
   response = embeddings_client.embeddings.create(input=[text], model=model)
-  update_cost_logger(response=response, input_cost=openai_config["embeddings-costs"]["input"], output_cost=openai_config["embeddings-costs"]["output"])
+  cost_logger.update_cost(response=response, input_cost=openai_config["embeddings-costs"]["input"], output_cost=openai_config["embeddings-costs"]["output"])
   return response.data[0].embedding
 
 
