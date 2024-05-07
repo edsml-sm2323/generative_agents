@@ -91,7 +91,10 @@ Change also the `cost-upperbound` according to your needs (the cost computation 
 ```bash
     ./run_backend.sh <ORIGIN> <TARGET>
 ```
-
+Example:
+```bash
+    ./run_backend.sh base_the_ville_isabella_maria_klaus simulation-test
+```
 ## Cost Tracking
 
 For the cost tracking is used the package "[openai-cost-logger](https://github.com/drudilorenzo/openai-cost-logger)". Given the possible high cost of a simulation,  you can set a cost upperbound in the config file to be able to raise an exception and stop the execution when it is reached.
