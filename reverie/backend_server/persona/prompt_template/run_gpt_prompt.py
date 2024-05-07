@@ -357,7 +357,6 @@ def run_gpt_prompt_task_decomp(persona,
     return prompt_input
 
   def __func_clean_up(gpt_response, prompt=""):
-    print ("TOODOOOOOO")
     print (gpt_response)
     print ("-==- -==- -==- ")
 
