@@ -80,6 +80,23 @@ Be aware that the only supported clients are **azure** and **openai**.\
 The generation and the embedding models are configured separately to be able to use different clients.\
 Change also the `cost-upperbound` according to your needs (the cost computation is done using "[openai-cost-logger](https://github.com/drudilorenzo/openai-cost-logger)" and the costs are specified per million tokens).
 
+### Step 3. Create utils file
+
+In the `reverie/backend_server` folder (where `reverie.py` is located), create a new file titled `utils.py` and copy and paste the content below into the file:
+```python
+maze_assets_loc = "../../environment/frontend_server/static_dirs/assets"
+env_matrix = f"{maze_assets_loc}/the_ville/matrix"
+env_visuals = f"{maze_assets_loc}/the_ville/visuals"
+
+fs_storage = "../../environment/frontend_server/storage"
+fs_temp_storage = "../../environment/frontend_server/temp_storage"
+
+collision_block_id = "32125"
+
+# Verbose 
+debug = True
+```
+
 ## Running a simulation
 
 ### Step 1. Starting the Environment Server
@@ -95,6 +112,15 @@ Example:
 ```bash
     ./run_backend.sh base_the_ville_isabella_maria_klaus simulation-test
 ```
+
+### Endpoint list
+- [http://localhost:8000/](http://localhost:8000/) - check if the server is running
+- [http://localhost:8000/simulator_home](http://localhost:8000/simulator_home) - watch the live simulation
+- `http://localhost:8000/replay/<simulation-name>/<starting-time-step>` - replay a simulation
+
+For a more detailed explanation see the [original readme](README_origin.md).
+
+
 ## Cost Tracking
 
 For the cost tracking is used the package "[openai-cost-logger](https://github.com/drudilorenzo/openai-cost-logger)". Given the possible high cost of a simulation,  you can set a cost upperbound in the config file to be able to raise an exception and stop the execution when it is reached.
