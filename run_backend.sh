@@ -14,4 +14,5 @@ source /home/${USER}/anaconda3/bin/activate ${CONDA_ENV}
 
 timestamp=$(date +"%Y-%m-%d_%H-%M-%S")
 echo "Timestamp: ${timestamp}"
+mkdir -p ../../logs
 python3 ${BACKEND_SCRIPT_FILE} --origin ${1} --target ${2} | tee  ../../logs/${1}_${timestamp}.txt
