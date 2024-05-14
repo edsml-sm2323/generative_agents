@@ -13,6 +13,9 @@ static_dirs/*
 !storage/base_the_ville_isabella_maria_klaus/*
 !storage/base_the_ville_n25/*
 
+# Logs folder
+logs/*
+
 bin/
 include/
 pip-selfcheck.json

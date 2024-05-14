@@ -1,7 +1,6 @@
 #!/bin/bash
 
 BACKEND_SCRIPT_PATH="reverie/backend_server"
-#BACKEND_SCRIPT_FILE="automatic_execution.py"
 BACKEND_SCRIPT_FILE="reverie.py"
 CONDA_ENV="simulacra"
 
@@ -13,4 +12,6 @@ echo "Running backend server at: http://127.0.0.1:8000/simulator_home"
 cd ${BACKEND_SCRIPT_PATH}
 source /home/${USER}/anaconda3/bin/activate ${CONDA_ENV}
 
-python3 ${BACKEND_SCRIPT_FILE} --origin ${1} --target ${2}
+timestamp=$(date +"%Y-%m-%d_%H-%M-%S")
+echo "Timestamp: ${timestamp}"
+python3 ${BACKEND_SCRIPT_FILE} --origin ${1} --target ${2} | tee  ../../logs/${1}_${timestamp}.txt
