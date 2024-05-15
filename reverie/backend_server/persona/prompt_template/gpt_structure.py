@@ -10,15 +10,12 @@ from pathlib import Path
 from openai import AzureOpenAI, OpenAI
 
 from utils import *
-
 from openai_cost_logger import DEFAULT_LOG_PATH
 from persona.prompt_template.openai_logger_singleton import OpenAICostLogger_Singleton
-
 
 config_path = Path("../../openai_config.json")
 with open(config_path, "r") as f:
     openai_config = json.load(f) 
-
 
 def setup_client(type: str, config: dict):
   """Setup the OpenAI client.
@@ -47,7 +44,6 @@ def setup_client(type: str, config: dict):
     raise ValueError("Invalid client")
   return client
 
-
 if openai_config["client"] == "azure":
   client = setup_client("azure", {
       "endpoint": openai_config["model-endpoint"],
@@ -69,9 +65,9 @@ else:
   raise ValueError("Invalid embeddings client")
 
 cost_logger = OpenAICostLogger_Singleton(
-    experiment_name = openai_config["experiment-name"],
-    log_folder = DEFAULT_LOG_PATH,
-    cost_upperbound = openai_config["cost-upperbound"]
+  experiment_name = openai_config["experiment-name"],
+  log_folder = DEFAULT_LOG_PATH,
+  cost_upperbound = openai_config["cost-upperbound"]
 )
 
 
@@ -255,12 +251,15 @@ def safe_generate_response(prompt,
 
   for i in range(repeat): 
     curr_gpt_response = GPT_request(prompt, gpt_parameter)
-    if func_validate(curr_gpt_response, prompt=prompt): 
-      return func_clean_up(curr_gpt_response, prompt=prompt)
-    if verbose: 
-      print ("---- repeat count: ", i, curr_gpt_response)
-      print (curr_gpt_response)
-      print ("~~~~")
+    try:
+      if func_validate(curr_gpt_response, prompt=prompt): 
+        return func_clean_up(curr_gpt_response, prompt=prompt)
+      if verbose: 
+        print ("---- repeat count: ", i, curr_gpt_response)
+        print (curr_gpt_response)
+        print ("~~~~")
+    except:
+      pass
   return fail_safe_response
 
 

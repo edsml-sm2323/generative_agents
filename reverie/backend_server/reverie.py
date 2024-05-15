@@ -305,6 +305,7 @@ class ReverieServer:
 
     # The main while loop of Reverie. 
     while (True): 
+      
       # Done with this iteration if <int_counter> reaches 0. 
       if int_counter == 0: 
         break
@@ -416,7 +417,7 @@ class ReverieServer:
       time.sleep(self.server_sleep)
 
 
-  def open_server(self): 
+  def open_server(self, input_command: str = None) -> None: 
     """
     Open up an interactive terminal prompt that lets you run the simulation 
     step by step and probe agent state. 
@@ -435,7 +436,10 @@ class ReverieServer:
     sim_folder = f"{fs_storage}/{self.sim_code}"
 
     while True: 
-      sim_command = input("Enter option: ")
+      if not input_command:
+        sim_command = input("Enter option: ")
+      else:
+        sim_command = input_command
       sim_command = sim_command.strip()
       ret_str = ""
 
@@ -469,7 +473,7 @@ class ReverieServer:
           # Runs the number of steps specified in the prompt.
           # Example: run 1000
           int_count = int(sim_command.split()[-1])
-          rs.start_server(int_count)
+          self.start_server(int_count)
 
         elif ("print persona schedule" 
               in sim_command[:22].lower()): 
@@ -595,19 +599,26 @@ class ReverieServer:
           load_history_via_whisper(self.personas, clean_whispers)
 
         print (ret_str)
-
-      except:
-        traceback.print_exc()
-        print ("Error.")
-        pass
-
+        
+      except Exception as e:
+        print("(reverie.py) Error: ", e)
+        # remove movement file if it exists
+        movement_file = f"{sim_folder}/movement/{self.step}.json"
+        if os.path.exists(movement_file):
+          os.remove(movement_file)
+        # remove environment file if it exists
+        env_file = f"{sim_folder}/environment/{self.step}.json"
+        if os.path.exists(env_file):
+          os.remove(env_file)
+        print(f"(reverie.py) Error at step {self.step}")
+        self.step -= 1
+        raise Exception(e, self.step)
+      else:
+        # If an input command was passed, then execute one command and exit.
+        if input_command:
+          break
 
 if __name__ == '__main__':
-  # rs = ReverieServer("base_the_ville_isabella_maria_klaus", 
-  #                    "July1_the_ville_isabella_maria_klaus-step-3-1")
-  # rs = ReverieServer("July1_the_ville_isabella_maria_klaus-step-3-20", 
-  #                    "July1_the_ville_isabella_maria_klaus-step-3-21")
-  # rs.open_server()
 
   # Pars input params
   parser = argparse.ArgumentParser(description='Reverie Server')
@@ -629,7 +640,6 @@ if __name__ == '__main__':
   
   print(f"Origin: {origin}")
   print(f"Target: {target}")
-                      
 
   rs = ReverieServer(origin, target)
   rs.open_server()
