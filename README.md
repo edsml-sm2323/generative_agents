@@ -13,7 +13,7 @@ Since the project is no longer officially supported, I decided to develop some n
 - [x] **Cost tracking** using [openai-cost-logger](https://github.com/drudilorenzo/openai-cost-logger)
 - [x] Set **cost upperbound** and stop the experiment when it is reached
 - [x] New models and OpenAI API support
-- [x] Added `skip-morning-s-14`: a simulation based on `base_the_ville_n25` that starts after 3000 steps (~8:00am). That permits to save time and see interactions and actions earlier.
+- [x] Added `skip-morning-s-14`: a simulation based on `base_the_ville_n25` that starts after 3000 steps (~8:00am). That permits us to save time and see interactions and actions earlier.
 
 ## Setting Up The Environment
 
