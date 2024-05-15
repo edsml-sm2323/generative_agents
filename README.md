@@ -13,6 +13,7 @@ Since the project is no longer officially supported, I decided to develop some n
 - [x] **Cost tracking** using [openai-cost-logger](https://github.com/drudilorenzo/openai-cost-logger)
 - [x] Set **cost upperbound** and stop the experiment when it is reached
 - [x] New models and OpenAI API support
+- [x] Added `skip-morning-s-14`: a simulation based on `base_the_ville_n25` that starts after 3000 steps (~8:00am). That permits to save time and see interactions and actions earlier.
 
 ## Setting Up The Environment
 
@@ -139,5 +140,4 @@ See all the details of your expenses using the notebook "[cost_viz.ipynb](https:
 ## TO-FIX/TO-BE-DONE
 Although this repo contains numerous fixes, here are some problems that have not yet been resolved or new features I would like to add:
 - [ ] joonspk-research/generative_agents#111: Still have to understand when it happens (in my case it happens after lots of steps like 4/5000) - [screen](https://github.com/drudilorenzo/generative_agents/blob/main/current-bugs/1.png)
-- [ ] joonspk-research/generative_agents#26: Start the day later to be able to have events happening sooner
 - [ ] joonspk-research/generative_agents#27: Add zoom in/out
