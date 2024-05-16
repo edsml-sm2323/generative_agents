@@ -36,6 +36,18 @@ from utils import *
 from maze import *
 from persona.persona import *
 
+current_file = os.path.abspath(__file__)
+
+def trace_calls_and_lines(frame, event, arg):
+    if event == 'call':
+        code = frame.f_code
+        filename = code.co_filename
+        short_filename = os.path.relpath(filename)
+        if os.path.abspath(filename).startswith(os.getcwd()):
+        # # if os.path.abspath(filename).startswith():
+        # # if filename == current_file:
+            print(f"Calling function: {code.co_name} in {short_filename}:{code.co_firstlineno}")
+
 ##############################################################################
 #                                  REVERIE                                   #
 ##############################################################################
@@ -412,7 +424,6 @@ class ReverieServer:
           self.curr_time += datetime.timedelta(seconds=self.sec_per_step)
 
           int_counter -= 1
-          
       # Sleep so we don't burn our machines. 
       time.sleep(self.server_sleep)
 
