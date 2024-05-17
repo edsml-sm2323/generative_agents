@@ -74,34 +74,60 @@ def start_web_tab() -> None:
     time.sleep(15)
     webbrowser.get(chrome_path).open(url, new=2)
 
-def get_exp_name () -> None:
-    """Set the experiment name in the openai_config.json file
+
+def get_new_checkpoint(step: int, tot_steps: int, checkpoint_freq: int) -> int:
+    """Get the current checkpoint from the checkpoint file
+
+    Args:
+        step (int): The current step.
+        tot_steps (int): The total steps to run.
+        checkpoint_freq (int): The frequency of the checkpoints.
 
     Returns:
-        exp_name (str): The name of the experiment
+        int: The new checkpoint.
     """
-    config_path = Path("../../openai_config.json")
-    with open(config_path, "r") as f:
-        openai_config = json.load(f) 
-    return openai_config["experiment-name"]
+    new_checkpoint = step + checkpoint_freq
+    if new_checkpoint > tot_steps:
+        new_checkpoint = tot_steps
+    return new_checkpoint
+
+
+def save_checkpoint(rs, idx: int) -> Tuple[str, int, int]:
+    """Save the checkpoint and return the data to start the new one.
+
+    Args:
+        rs (ReverieServer): The reverie server object.
+        idx (int): The index of the checkpoint.
+    
+    Returns:
+        Tuple[str, int, int]: The name of the new experiment, the starting step and the index of the checkpoint.
+    """
+    target = rs.sim_code
+    rs.open_server(input_command="fin")
+    print(f"Checkpoint saved: {target}", flush=True)    
+    return target, get_starting_step(target), idx+1
+    
 
 if __name__ == '__main__':
+    checkpoint_freq = 200 # 1 step = 10 sec
     log_path = "cost-logs"
+    idx = 0
     origin, target, tot_steps = parse_args()
     current_step = get_starting_step(origin)
-    exp_name = get_exp_name()
+    exp_name = target
     start_time = datetime.now()
     tot_steps = int(tot_steps)
-    idx = 0
+    curr_checkpoint = get_new_checkpoint(current_step, tot_steps, checkpoint_freq)
     
     print(f"Origin: {origin}")
     print(f"Target: {target}")
+    print(f"Total steps: {tot_steps}")
     
     while current_step < tot_steps:
         try:
-            steps_to_run = tot_steps - current_step
-            target = f"{exp_name}-s-{idx}"
-            print(f"Running experiment '{target}' from step '{current_step}' to '{tot_steps}'", flush=True)
+            steps_to_run = curr_checkpoint - current_step
+            target = f"{exp_name}-s-{idx}-{current_step}-{curr_checkpoint}"
+            print(f"Running experiment '{exp_name}' from step '{current_step}' to '{curr_checkpoint}'", flush=True)
             rs = reverie.ReverieServer(origin, target)
             th = threading.Thread(target=start_web_tab)
             th.start()
@@ -113,17 +139,14 @@ if __name__ == '__main__':
             print(e.args[0], flush=True)
             step = e.args[1]
             if step != 0:
-                rs.open_server(input_command="fin")
-                origin = target
-                current_step = get_starting_step(origin)
-                idx += 1
+                origin, current_step, idx = save_checkpoint(rs, idx)
             else:
                 # delete the experiment
                 shutil.rmtree(f"../../environment/frontend_server/storage/{target}")
             print(f"Error at step {current_step}", flush=True)
         else:
-            rs.open_server(input_command="fin")
-            break
+            origin, current_step, idx = save_checkpoint(rs, idx)
+            curr_checkpoint = get_new_checkpoint(current_step, tot_steps, checkpoint_freq)
 
     print(f"Experiment finished: {exp_name}")
     print(f"Execution time: {datetime.now() - start_time}")

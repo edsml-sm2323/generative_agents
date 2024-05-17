@@ -134,8 +134,26 @@ See all the details of your expenses using the notebook "[cost_viz.ipynb](https:
 
 - **Model**: "gpt-3.5-turbo-0125"
 - **Embeddings**: "text-embedding-3-small"
+- **N. Agents**: 3
 - **Steps**: ~5000
 - **Final Cost**: ~0.31 USD
+
+### 2. base_the_ville_n25
+
+- See the simulation saved: [skip-morning-s-14](https://github.com/drudilorenzo/generative_agents/tree/fix-and-improve/environment/frontend_server/storage/skip-morning-s-14)
+- **Model**: "gpt-3.5-turbo-0125"
+- **Embeddings**: "text-embedding-3-small"
+- **N. Agents**: 25
+- **Steps**: ~3000 (until ~8 a.m.)
+- **Final Cost**: ~1.3 USD
+
+### 3. base_the_ville_n25
+
+- **Model**: "gpt-3.5-turbo-0125"
+- **Embeddings**: "text-embedding-3-small"
+- **N. Agents**: 25
+- **Steps**: ~8650 (full day)
+- **Final Cost**: ~18.5 USD
 
 ## TO-FIX/TO-BE-DONE
 Although this repo contains numerous fixes, here are some problems that have not yet been resolved or new features I would like to add:
