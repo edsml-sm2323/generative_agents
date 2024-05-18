@@ -1,4 +1,4 @@
-# Setting 1 -- test, max conscientiousness for 1, min for 2, 1 voter, run 1-2 days, survey few times, expecting the survey total to favor 1
+# Setting 1 -- test, max conscientiousness for 1, min for 2, 5 voters, run 1-2 days, survey few times, expecting the survey total to favor 1
 ### Voters - 5
 - Isabela -- voter
 scratch:currently (event)
