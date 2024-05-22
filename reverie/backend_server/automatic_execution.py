@@ -69,7 +69,6 @@ def get_starting_step(exp_name: str) -> int:
     if full_path.exists():
         files = os.listdir(full_path)
         steps = [int(os.path.splitext(filename)[0]) for filename in files]
-        print(f"Steps: {steps}", flush=True)
         current_step = max(steps)
     return current_step
 
@@ -83,7 +82,7 @@ def start_web_tab(ui: bool) -> None:
     url = "http://localhost:8000/simulator_home"
     chrome_path = '/usr/bin/google-chrome %s'
     print("Opening the simulator home page", flush=True)
-    time.sleep(15)
+    time.sleep(5)
     try:
         if ui:
             webbrowser.get(chrome_path).open(url, new=2)
