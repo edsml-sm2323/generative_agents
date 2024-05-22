@@ -254,13 +254,18 @@ def load_history_via_whisper(personas, whispers):
                               thought_embedding_pair, None)
 
 
-def open_convo_session(persona, convo_mode, safe_mode=True, direct=False): 
+def open_convo_session(persona, convo_mode, safe_mode=True, direct=False, question: str=None): 
+  if direct and question is None:
+    raise ValueError("If direct is True, question must be provided.")
   if convo_mode == "analysis": 
     curr_convo = []
     interlocutor_desc = "Interviewer"
 
-    while True: 
-      line = input("Enter Input: ")
+    while True:
+      if direct:
+        line = question
+      else:
+        line = input("Enter Input: ")
       if line == "end_convo": 
         break
 
