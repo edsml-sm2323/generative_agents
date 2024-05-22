@@ -2,27 +2,27 @@
 
 import os
 import sys
-import json
 import time
 import shutil
 import reverie
 import argparse
-import threading
 import webbrowser
 from typing import Tuple
 from pathlib import Path
 from datetime import datetime
+from multiprocessing import Process
 from openai_cost_logger import OpenAICostLoggerViz
 
 
-def parse_args() -> Tuple[str, str]:
+def parse_args() -> Tuple[str, str, int, bool]:
     """Parse bash arguments
 
     Returns:
-        Tuple[str, str, int]:
+        Tuple[str, str, int, bool]:
             - name of the forked simulation
             - the name of the new simulation
             - total steps to run (step = 10sec in the simulation)
+            - open the simulator UI
     """
     parser = argparse.ArgumentParser(description='Reverie Server')
     parser.add_argument(
@@ -43,10 +43,18 @@ def parse_args() -> Tuple[str, str]:
         default="8640", # 24 hours
         help='Total steps to run'
     )
+    parser.add_argument(
+        '--ui',
+        type=str,
+        default="True",
+        help='Open the simulator UI'
+    )
     origin = parser.parse_args().origin
     target = parser.parse_args().target
     steps = parser.parse_args().steps
-    return origin, target, steps
+    ui = parser.parse_args().ui
+    ui = True if ui.lower() == "true" else False
+    return origin, target, steps, ui
 
 
 def get_starting_step(exp_name: str) -> int:
@@ -66,13 +74,23 @@ def get_starting_step(exp_name: str) -> int:
     return current_step
 
 
-def start_web_tab() -> None:
-    """Open a new tab in the browser with the simulator home page"""
+def start_web_tab(ui: bool) -> None:
+    """Open a new tab in the browser with the simulator home page
+    
+    Args:
+        ui (bool): Open the simulator UI.
+    """
     url = "http://localhost:8000/simulator_home"
     chrome_path = '/usr/bin/google-chrome %s'
     print("Opening the simulator home page", flush=True)
     time.sleep(15)
-    webbrowser.get(chrome_path).open(url, new=2)
+    try:
+        if ui:
+            webbrowser.get(chrome_path).open(url, new=2)
+        else:
+            os.system(f"google-chrome --headless --remote-debugging-port=9222 {url}")
+    except Exception as e:
+        print(e, flush=True)
 
 
 def get_new_checkpoint(step: int, tot_steps: int, checkpoint_freq: int) -> int:
@@ -92,27 +110,30 @@ def get_new_checkpoint(step: int, tot_steps: int, checkpoint_freq: int) -> int:
     return new_checkpoint
 
 
-def save_checkpoint(rs, idx: int) -> Tuple[str, int, int]:
+def save_checkpoint(rs, idx: int, th) -> Tuple[str, int, int]:
     """Save the checkpoint and return the data to start the new one.
 
     Args:
         rs (ReverieServer): The reverie server object.
         idx (int): The index of the checkpoint.
+        th (Process): The process of the web tab.
     
     Returns:
         Tuple[str, int, int]: The name of the new experiment, the starting step and the index of the checkpoint.
     """
     target = rs.sim_code
     rs.open_server(input_command="fin")
+    if th.is_alive():
+        th.kill()
     print(f"Checkpoint saved: {target}", flush=True)    
     return target, get_starting_step(target), idx+1
     
 
 if __name__ == '__main__':
-    checkpoint_freq = 200 # 1 step = 10 sec
+    checkpoint_freq = 2 # 1 step = 10 sec
     log_path = "cost-logs"
     idx = 0
-    origin, target, tot_steps = parse_args()
+    origin, target, tot_steps, ui = parse_args()
     current_step = get_starting_step(origin)
     exp_name = target
     start_time = datetime.now()
@@ -126,10 +147,14 @@ if __name__ == '__main__':
     while current_step < tot_steps:
         try:
             steps_to_run = curr_checkpoint - current_step
+            print(f"Current step: {current_step}")
+            print(f"Steps to run: {steps_to_run}")
+            print(f"Freq: {checkpoint_freq}")
+            print(f"Current checkpoint: {curr_checkpoint}")
             target = f"{exp_name}-s-{idx}-{current_step}-{curr_checkpoint}"
             print(f"Running experiment '{exp_name}' from step '{current_step}' to '{curr_checkpoint}'", flush=True)
             rs = reverie.ReverieServer(origin, target)
-            th = threading.Thread(target=start_web_tab)
+            th = Process(target=start_web_tab, args=(ui,))
             th.start()
             rs.open_server(input_command=f"run {steps_to_run}")
         except KeyboardInterrupt:
@@ -139,16 +164,19 @@ if __name__ == '__main__':
             print(e.args[0], flush=True)
             step = e.args[1]
             if step != 0:
-                origin, current_step, idx = save_checkpoint(rs, idx)
+                origin, current_step, idx = save_checkpoint(rs, idx, th)
             else:
-                # delete the experiment
                 shutil.rmtree(f"../../environment/frontend_server/storage/{target}")
             print(f"Error at step {current_step}", flush=True)
         else:
-            origin, current_step, idx = save_checkpoint(rs, idx)
+            origin, current_step, idx = save_checkpoint(rs, idx, th)
             curr_checkpoint = get_new_checkpoint(current_step, tot_steps, checkpoint_freq)
+        finally:
+            if th.is_alive():
+                th.kill()
 
     print(f"Experiment finished: {exp_name}")
-    print(f"Execution time: {datetime.now() - start_time}")
     OpenAICostLoggerViz.print_experiment_cost(experiment=exp_name, path=log_path)
     OpenAICostLoggerViz.print_total_cost(path=log_path)
+    print(f"Execution time: {datetime.now() - start_time}")
+    sys.exit(0)
