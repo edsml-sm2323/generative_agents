@@ -10,3 +10,10 @@
 
 # todo
 - dictionaries for agents
+
+# survey
+./run_frontend.sh
+./run_backend.sh base_the_ville_smol_elections_5_voters_2days/base_the_ville_smol_elections_5_voters_2days-s-71-6595-6795 analysis
+
+call -- analysis Abigal Chen
+

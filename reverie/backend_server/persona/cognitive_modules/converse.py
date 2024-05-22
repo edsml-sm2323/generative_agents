@@ -254,7 +254,7 @@ def load_history_via_whisper(personas, whispers):
                               thought_embedding_pair, None)
 
 
-def open_convo_session(persona, convo_mode): 
+def open_convo_session(persona, convo_mode, safe_mode=True, direct=False): 
   if convo_mode == "analysis": 
     curr_convo = []
     interlocutor_desc = "Interviewer"
@@ -264,7 +264,7 @@ def open_convo_session(persona, convo_mode):
       if line == "end_convo": 
         break
 
-      if int(run_gpt_generate_safety_score(persona, line)[0]) >= 8: 
+      if int(run_gpt_generate_safety_score(persona, line)[0]) >= 8 and safe_mode: 
         print (f"{persona.scratch.name} is a computational agent, and as such, it may be inappropriate to attribute human agency to the agent in your communication.")        
 
       else: 
@@ -274,6 +274,8 @@ def open_convo_session(persona, convo_mode):
 
         next_line = generate_next_line(persona, interlocutor_desc, curr_convo, summarized_idea)
         curr_convo += [[persona.scratch.name, next_line]]
+        if direct: 
+          return curr_convo
 
 
   elif convo_mode == "whisper": 
