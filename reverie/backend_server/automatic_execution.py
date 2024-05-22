@@ -88,7 +88,7 @@ def start_web_tab(ui: bool) -> None:
         if ui:
             webbrowser.get(chrome_path).open(url, new=2)
         else:
-            os.system(f"google-chrome --headless --remote-debugging-port=9222 {url}")
+            os.system(f"google-chrome --headless --disable-gpu --remote-debugging-port=9222 {url}")
     except Exception as e:
         print(e, flush=True)
 
