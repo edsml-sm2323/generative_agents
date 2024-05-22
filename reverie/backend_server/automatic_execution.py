@@ -49,12 +49,19 @@ def parse_args() -> Tuple[str, str, int, bool]:
         default="True",
         help='Open the simulator UI'
     )
+    parser.add_argument(
+        '--browser_path',
+        type=str,
+        default="/usr/bin/google-chrome %s",
+        help='Browser path, default is /usr/bin/google-chrome %s'
+    )
     origin = parser.parse_args().origin
     target = parser.parse_args().target
     steps = parser.parse_args().steps
     ui = parser.parse_args().ui
     ui = True if ui.lower() == "true" else False
-    return origin, target, steps, ui
+    browser_path = parser.parse_args().browser_path
+    return origin, target, steps, ui, browser_path
 
 
 def get_starting_step(exp_name: str) -> int:
@@ -73,19 +80,18 @@ def get_starting_step(exp_name: str) -> int:
     return current_step
 
 
-def start_web_tab(ui: bool) -> None:
+def start_web_tab(ui: bool, browser_path: str) -> None:
     """Open a new tab in the browser with the simulator home page
     
     Args:
         ui (bool): Open the simulator UI.
     """
     url = "http://localhost:8000/simulator_home"
-    chrome_path = '/usr/bin/google-chrome %s'
     print("Opening the simulator home page", flush=True)
     time.sleep(5)
     try:
         if ui:
-            webbrowser.get(chrome_path).open(url, new=2)
+            webbrowser.get(browser_path).open(url, new=2)
         else:
             os.system(f"google-chrome --headless --disable-gpu --remote-debugging-port=9222 {url}")
     except Exception as e:
@@ -132,7 +138,7 @@ if __name__ == '__main__':
     checkpoint_freq = 2 # 1 step = 10 sec
     log_path = "cost-logs"
     idx = 0
-    origin, target, tot_steps, ui = parse_args()
+    origin, target, tot_steps, ui, browser_path = parse_args()
     current_step = get_starting_step(origin)
     exp_name = target
     start_time = datetime.now()
@@ -153,7 +159,7 @@ if __name__ == '__main__':
             target = f"{exp_name}-s-{idx}-{current_step}-{curr_checkpoint}"
             print(f"Running experiment '{exp_name}' from step '{current_step}' to '{curr_checkpoint}'", flush=True)
             rs = reverie.ReverieServer(origin, target)
-            th = Process(target=start_web_tab, args=(ui,))
+            th = Process(target=start_web_tab, args=(ui, browser_path))
             th.start()
             rs.open_server(input_command=f"run {steps_to_run}")
         except KeyboardInterrupt:
