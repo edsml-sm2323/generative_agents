@@ -21,7 +21,7 @@ Since the project is no longer officially supported, I decided to develop some n
 
 Do not change the env name to be able to use the bash scripts later.
 ```bash
-    conda env create -n simulacra python=3.9.12 pip
+    conda create -n simulacra python=3.9.12 pip
     conda activate simulacra
     pip install -r requirements.txt
 ```
