@@ -17,3 +17,7 @@
 
 call -- analysis Abigal Chen
 
+# problems?
+- the way we survey, question formulation, mod of survey etc
+- should we input to the agent memory the survey?
+- look at the way the interview is prepared (prompt with idea)
