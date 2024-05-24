@@ -17,7 +17,19 @@
 
 call -- analysis Abigal Chen
 
+# info
+- 1 step = 10 sec
+
 # problems?
 - the way we survey, question formulation, mod of survey etc
 - should we input to the agent memory the survey?
 - look at the way the interview is prepared (prompt with idea)
+
+# ideas
+- self-constiousness(?) of agents is model dependent (agents dont vote on themselves with gpt-3.5, do they vote with gpt-4?)
+
+# todo
+- debug mem, debug shapes
+- change config to disentangle personality-familiarity -> send to lorenzo
+- survey with gpt4
+- add time to graphs
