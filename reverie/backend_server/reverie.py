@@ -612,7 +612,7 @@ class ReverieServer:
         print (ret_str)
         
       except Exception as e:
-        print("(reverie.py) Error: ", e)
+        print("(reverie): Error: ", e)
         # remove movement file if it exists
         movement_file = f"{sim_folder}/movement/{self.step}.json"
         if os.path.exists(movement_file):
@@ -621,8 +621,9 @@ class ReverieServer:
         env_file = f"{sim_folder}/environment/{self.step}.json"
         if os.path.exists(env_file):
           os.remove(env_file)
-        print(f"(reverie.py) Error at step {self.step}")
+        print(f"(reverie): Error at step {self.step}")
         self.step -= 1
+        self.curr_time -= datetime.timedelta(seconds=self.sec_per_step)
         raise Exception(e, self.step)
       else:
         # If an input command was passed, then execute one command and exit.
