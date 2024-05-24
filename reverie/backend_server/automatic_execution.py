@@ -61,6 +61,7 @@ def parse_args() -> Tuple[str, str, int, bool]:
     ui = parser.parse_args().ui
     ui = True if ui.lower() == "true" else False
     browser_path = parser.parse_args().browser_path
+    
     return origin, target, steps, ui, browser_path
 
 
@@ -87,7 +88,7 @@ def start_web_tab(ui: bool, browser_path: str) -> None:
         ui (bool): Open the simulator UI.
     """
     url = "http://localhost:8000/simulator_home"
-    print("Opening the simulator home page", flush=True)
+    print("(Auto-Exec): Opening the simulator home page", flush=True)
     time.sleep(5)
     try:
         if ui:
@@ -115,7 +116,7 @@ def get_new_checkpoint(step: int, tot_steps: int, checkpoint_freq: int) -> int:
     return new_checkpoint
 
 
-def save_checkpoint(rs, idx: int, th) -> Tuple[str, int, int]:
+def save_checkpoint(rs, idx: int, th: Process) -> Tuple[str, int, int]:
     """Save the checkpoint and return the data to start the new one.
 
     Args:
@@ -128,9 +129,7 @@ def save_checkpoint(rs, idx: int, th) -> Tuple[str, int, int]:
     """
     target = rs.sim_code
     rs.open_server(input_command="fin")
-    if th.is_alive():
-        th.kill()
-    print(f"Checkpoint saved: {target}", flush=True)    
+    print(f"(Auto-Exec): Checkpoint saved: {target}", flush=True)    
     return target, get_starting_step(target), idx+1
     
 
@@ -144,44 +143,45 @@ if __name__ == '__main__':
     start_time = datetime.now()
     tot_steps = int(tot_steps)
     curr_checkpoint = get_new_checkpoint(current_step, tot_steps, checkpoint_freq)
-    
-    print(f"Origin: {origin}")
-    print(f"Target: {target}")
-    print(f"Total steps: {tot_steps}")
+
+    print("(Auto-Exec): STARTING THE EXPERIMENT", flush=True)
+    print(f"(Auto-Exec): Origin: {origin}", flush=True)
+    print(f"(Auto-Exec): Target: {target}", flush=True)
+    print(f"(Auto-Exec): Total steps: {tot_steps}", flush=True)
+    print(f"(Auto-Exec): Checkpoint Freq: {checkpoint_freq}", flush=True)
     
     while current_step < tot_steps:
         try:
             steps_to_run = curr_checkpoint - current_step
-            print(f"Current step: {current_step}")
-            print(f"Steps to run: {steps_to_run}")
-            print(f"Freq: {checkpoint_freq}")
-            print(f"Current checkpoint: {curr_checkpoint}")
             target = f"{exp_name}-s-{idx}-{current_step}-{curr_checkpoint}"
-            print(f"Running experiment '{exp_name}' from step '{current_step}' to '{curr_checkpoint}'", flush=True)
+            print(f"(Auto-Exec): STAGE {idx}", flush=True)
+            print(f"(Auto-Exec): Running experiment '{exp_name}' from step '{current_step}' to '{curr_checkpoint}'", flush=True)
             rs = reverie.ReverieServer(origin, target)
             th = Process(target=start_web_tab, args=(ui, browser_path))
             th.start()
             rs.open_server(input_command=f"run {steps_to_run}")
         except KeyboardInterrupt:
-            print("KeyboardInterrupt: Stopping the experiment.")
+            print("(Auto-Exec): KeyboardInterrupt: Stopping the experiment.", flush=True)
             sys.exit(0)
         except Exception as e:
-            print(e.args[0], flush=True)
+            print(e, flush=True)
             step = e.args[1]
             if step != 0:
                 origin, current_step, idx = save_checkpoint(rs, idx, th)
             else:
                 shutil.rmtree(f"../../environment/frontend_server/storage/{target}")
-            print(f"Error at step {current_step}", flush=True)
+            print(f"(Auto-Exec): Error at step {current_step}", flush=True)
+            print(f"(Auto-Exec): Exception {e.args[0]}", flush=True)
         else:
             origin, current_step, idx = save_checkpoint(rs, idx, th)
             curr_checkpoint = get_new_checkpoint(current_step, tot_steps, checkpoint_freq)
         finally:
+            time.sleep(10) # Wait for the server to finish and then kill the process
             if th.is_alive():
-                th.kill()
+                th.terminate()
 
-    print(f"Experiment finished: {exp_name}")
+    print(f"(Auto-Exec): EXPERIMENT FINISHED: {exp_name}")
     OpenAICostLoggerViz.print_experiment_cost(experiment=exp_name, path=log_path)
     OpenAICostLoggerViz.print_total_cost(path=log_path)
-    print(f"Execution time: {datetime.now() - start_time}")
+    print(f"(Auto-Exec): Execution time: {datetime.now() - start_time}")
     sys.exit(0)
