@@ -1,53 +1,53 @@
 # Setting 1 -- test, max conscientiousness for 1, min for 2, 5 voters, run 1-2 days, survey few times, expecting the survey total to favor 1
 ### Voters - 5
-- Isabela -- voter
+- Maria Lopez -- voter
 scratch:currently (event)
-Isabella is thinking about who to vote on the incoming town elections. She knows that Klaus Mauller and Maria Lopez are running for the town mayor office. The elections take place next week.
+Maria is thinking about whom to vote for in the upcoming town election. She knows that Adam Smith and Isabella Rodriguez are running for the office of town mayor. The election takes place next week.
 scratch:innate (personality)
 **we dont change anything here**
 
 
 - Abigail Chen -- voter
 scratch:currently
-Abigail is thinking about who to vote on the incoming town elections. She knows that Klaus Mauller and Maria Lopez are running for the town mayor office. The elections take place next week.
+Abigail is thinking about whom to vote for in the upcoming town election. She knows that Adam Smith and Isabella Rodriguez are running for the office of town mayor. The election takes place next week.
 scratch:innate
 **we dont change anything here**
 
 
-- Adam Smith -- voter
+- Klaus Mueller -- voter
 scratch:currently
-Adam is thinking about who to vote on the incoming town elections. He knows that Klaus Mauller and Maria Lopez are running for the town mayor office. The elections take place next week.
+Klauss is thinking about whom to vote for in the upcoming town election. He knows that Adam Smith and Isabella Rodriguez are running for the office of town mayor. The election takes place next week.
 scratch:innate
 **we dont change anything here**
 
 
 - Arthur Burton -- voter
 scratch:currently
-Arthur is thinking about who to vote on the incoming town elections. He knows that Klaus Mauller and Maria Lopez are running for the town mayor office. The elections take place next week.
+Arthur is thinking about whom to vote for in the upcoming town election. He knows that Adam Smith and Isabella Rodriguez are running for the office of town mayor. The election takes place next week.
 scratch:innate
 **we dont change anything here**
 
 
 - Ayesha Khan -- voter
 scratch:currently
-Ayesha is thinking about who to vote on the incoming town elections. She knows that Klaus Mauller and Maria Lopez are running for the town mayor office. The elections take place next week.
+Ayesha is thinking about whom to vote for in the upcoming town election. She knows that Adam Smith and Isabella Rodriguez are running for the office of town mayor. The election takes place next week.
 scratch:innate
 **we dont change anything here**
 
 
 ### Candidates - 2
-- Klaus Mueller -- candidate
+- Isabella Rodriguez -- candidate
 scratch:currently 
-Klaus is running as a candidate for the mayors office in the incoming town elections. He knows that Maria Lopez is also running for the office. The elections take place next week.
+Isabella is running as a candidate for the mayor’s office in the upcoming town election. She knows that Adam Smith is also running for the office. The election takes place next week.
+scratch:innate
+extremely unsure, extremely messy, extremely irresponsible, extremely lazy, extremely undisciplined, extremely impractical, extremely extravagant, extremely disorganized, extremely negligent, extremely careless
+
+- Adam Smith -- candidate
+scratch:currently 
+Adam is running as a candidate for the mayor’s office in the upcoming town election. He knows that Isabella Rodriguez is also running for the office. The election takes place next week.
 scratch:innate
 extremely self-efficacious, extremely orderly, extremely responsible, extremely hardworking, extremely self-disciplined, extremely practical, extremely thrifty, extremely organized, extremely conscientious, extremely thorough
 
-
-- Maria Lopez -- candidate
-scratch:currently 
-Klaus is running as a candidate for the mayors office in the incoming town elections. She knows that Maria Lopez is also running for the office. The elections take place next week.
-scratch:innate
-extremely unsure, extremely messy, extremely irresponsible, extremely lazy, extremely undisciplined, extremely impractical, extremely extravagant, extremely disorganized, extremely negligent, extremely careless
 
 # Big5 prompting (https://arxiv.org/pdf/2307.00184)
 1. extremely {low adjective} 2. very {low adjective}
