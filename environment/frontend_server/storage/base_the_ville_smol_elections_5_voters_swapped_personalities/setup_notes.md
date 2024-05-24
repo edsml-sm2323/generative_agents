@@ -1,4 +1,7 @@
 # Setting 1 -- test, max conscientiousness for 1, min for 2, 5 voters, run 1-2 days, survey few times, expecting the survey total to favor 1
+
+# swapped setup for deconfounding
+
 ### Voters - 5
 - Maria Lopez -- voter
 scratch:currently (event)
@@ -40,15 +43,14 @@ scratch:innate
 scratch:currently 
 Isabella is running as a candidate for the mayor’s office in the upcoming town election. She knows that Adam Smith is also running for the office. The election takes place next week.
 scratch:innate
-extremely unsure, extremely messy, extremely irresponsible, extremely lazy, extremely undisciplined, extremely impractical, extremely extravagant, extremely disorganized, extremely negligent, extremely careless
+extremely self-efficacious, extremely orderly, extremely responsible, extremely hardworking, extremely self-disciplined, extremely practical, extremely thrifty, extremely organized, extremely conscientious, extremely thorough
 
 - Adam Smith -- candidate
 scratch:currently 
 Adam is running as a candidate for the mayor’s office in the upcoming town election. He knows that Isabella Rodriguez is also running for the office. The election takes place next week.
 scratch:innate
-extremely self-efficacious, extremely orderly, extremely responsible, extremely hardworking, extremely self-disciplined, extremely practical, extremely thrifty, extremely organized, extremely conscientious, extremely thorough
+extremely unsure, extremely messy, extremely irresponsible, extremely lazy, extremely undisciplined, extremely impractical, extremely extravagant, extremely disorganized, extremely negligent, extremely careless
 
-# Deconfounding setup in _swapped_personalities
 
 
 # Big5 prompting (https://arxiv.org/pdf/2307.00184)

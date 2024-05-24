@@ -15,6 +15,7 @@ static_dirs/*
 !environment/frontend_server/storage/base_the_ville_isabella_maria_klaus/*
 !environment/frontend_server/storage/base_the_ville_n25/*
 !environment/frontend_server/storage/base_the_ville_smol_elections_5_voters
+!environment/frontend_server/storage/base_the_ville_smol_elections_5_voters_swapped_personalities
 
 # Keep the skip-morning-s simulation
 !environment/frontend_server/storage/skip-morning-s-14
