@@ -19,6 +19,7 @@ while [[ $# -gt 0 ]]; do
             ;;
         --target|-t)
             ARGS="${ARGS} --target ${2}"
+            TARGET=${2}
             shift
             shift
             ;;
@@ -56,4 +57,4 @@ echo "(${FILE_NAME}): Arguments: ${ARGS}"
 timestamp=$(date +"%Y-%m-%d_%H-%M-%S")
 echo "(${FILE_NAME}): Timestamp: ${timestamp}"
 mkdir -p ${LOGS_PATH}
-python3 ${BACKEND_SCRIPT_FILE} ${ARGS} | tee  ${LOGS_PATH}/${2}_${timestamp}.txt
+python3 ${BACKEND_SCRIPT_FILE} ${ARGS} | tee  ${LOGS_PATH}/${TARGET}_${timestamp}.txt
