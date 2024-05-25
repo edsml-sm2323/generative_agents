@@ -187,7 +187,11 @@ if __name__ == '__main__':
         finally:
             time.sleep(10) # Wait for the server to finish and then kill the process
             if th.is_alive():
+                print(f"(Auto-Exec): Killing the web tab process", flush=True)
                 th.kill()
+                th.join()
+                th.close()
+                print(f"(Auto-Exec): Web tab process killed", flush=True)
 
     print(f"(Auto-Exec): EXPERIMENT FINISHED: {exp_name}")
     OpenAICostLoggerViz.print_experiment_cost(experiment=exp_name, path=log_path)
