@@ -17,6 +17,8 @@ from global_methods import *
 from django.contrib.staticfiles.templatetags.staticfiles import static
 from .models import *
 
+fs_temp_storage = "temp_storage"
+
 def landing(request): 
   context = {}
   template = "landing/landing.html"
@@ -103,8 +105,8 @@ def UIST_Demo(request):
 
 
 def home(request):
-  f_curr_sim_code = "temp_storage/curr_sim_code.json"
-  f_curr_step = "temp_storage/curr_step.json"
+  f_curr_sim_code = f"{fs_temp_storage}/curr_sim_code.json"
+  f_curr_step = f"{fs_temp_storage}/curr_step.json"
 
   if not check_if_file_exists(f_curr_step): 
     context = {}
@@ -308,7 +310,7 @@ def path_tester_update(request):
   data = json.loads(request.body)
   camera = data["camera"]
 
-  with open(f"temp_storage/path_tester_env.json", "w") as outfile:
+  with open(f"{fs_temp_storage}/path_tester_env.json", "w") as outfile:
     outfile.write(json.dumps(camera, indent=2))
 
   return HttpResponse("received")

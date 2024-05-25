@@ -6,7 +6,6 @@ CONDA_ENV="simulacra"
 LOGS_PATH="../../logs"
 
 FILE_NAME="Bash-Script"
-echo "(${FILE_NAME}): Running backend server at: http://127.0.0.1:8000/simulator_home"
 cd ${BACKEND_SCRIPT_PATH}
 source /home/${USER}/anaconda3/bin/activate ${CONDA_ENV}
 
@@ -35,6 +34,12 @@ while [[ $# -gt 0 ]]; do
             ;;
         --browser_path|-bp)
             ARGS="${ARGS} --browser_path ${2}"
+            shift
+            shift
+            ;;
+        --port|-p)
+            ARGS="${ARGS} --port ${2}"
+            echo "(${FILE_NAME}): Running backend server at: http://127.0.0.1:${2}/simulator_home"
             shift
             shift
             ;;

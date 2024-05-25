@@ -56,6 +56,9 @@ class ReverieServer:
   def __init__(self, 
                fork_sim_code,
                sim_code):
+    
+    print ("(reverie): Temp storage: ", fs_temp_storage)
+        
     # FORKING FROM A PRIOR SIMULATION:
     # <fork_sim_code> indicates the simulation we are forking from. 
     # Interestingly, all simulations must be forked from some initial 
@@ -650,9 +653,6 @@ if __name__ == '__main__':
   origin = parser.parse_args().origin
   target = parser.parse_args().target
   
-  print(f"Origin: {origin}")
-  print(f"Target: {target}")
-
   rs = ReverieServer(origin, target)
   rs.open_server()
 

@@ -55,14 +55,21 @@ def parse_args() -> Tuple[str, str, int, bool]:
         default="/usr/bin/google-chrome %s",
         help='Browser path, default is /usr/bin/google-chrome %s'
     )
+    parser.add_argument(
+        '--port',
+        type=str,
+        default="8000",
+        help='Port number for the frontend server'
+    )
     origin = parser.parse_args().origin
     target = parser.parse_args().target
     steps = parser.parse_args().steps
     ui = parser.parse_args().ui
     ui = True if ui.lower() == "true" else False
     browser_path = parser.parse_args().browser_path
+    port = parser.parse_args().port
     
-    return origin, target, steps, ui, browser_path
+    return origin, target, steps, ui, browser_path, port
 
 
 def get_starting_step(exp_name: str) -> int:
@@ -81,13 +88,15 @@ def get_starting_step(exp_name: str) -> int:
     return current_step
 
 
-def start_web_tab(ui: bool, browser_path: str) -> None:
+def start_web_tab(ui: bool, browser_path: str, port: str) -> None:
     """Open a new tab in the browser with the simulator home page
     
     Args:
         ui (bool): Open the simulator UI.
+        browser_path (str): The path of the browser.
+        port (str): The port number of the frontend server.
     """
-    url = "http://localhost:8000/simulator_home"
+    url = f"http://localhost:{port}/simulator_home"
     print("(Auto-Exec): Opening the simulator home page", flush=True)
     time.sleep(5)
     try:
@@ -137,7 +146,7 @@ if __name__ == '__main__':
     checkpoint_freq = 2 # 1 step = 10 sec
     log_path = "cost-logs"
     idx = 0
-    origin, target, tot_steps, ui, browser_path = parse_args()
+    origin, target, tot_steps, ui, browser_path, port = parse_args()
     current_step = get_starting_step(origin)
     exp_name = target
     start_time = datetime.now()
@@ -149,7 +158,7 @@ if __name__ == '__main__':
     print(f"(Auto-Exec): Target: {target}", flush=True)
     print(f"(Auto-Exec): Total steps: {tot_steps}", flush=True)
     print(f"(Auto-Exec): Checkpoint Freq: {checkpoint_freq}", flush=True)
-    
+        
     while current_step < tot_steps:
         try:
             steps_to_run = curr_checkpoint - current_step
@@ -157,7 +166,7 @@ if __name__ == '__main__':
             print(f"(Auto-Exec): STAGE {idx}", flush=True)
             print(f"(Auto-Exec): Running experiment '{exp_name}' from step '{current_step}' to '{curr_checkpoint}'", flush=True)
             rs = reverie.ReverieServer(origin, target)
-            th = Process(target=start_web_tab, args=(ui, browser_path))
+            th = Process(target=start_web_tab, args=(ui, browser_path, port))
             th.start()
             rs.open_server(input_command=f"run {steps_to_run}")
         except KeyboardInterrupt:
@@ -178,7 +187,7 @@ if __name__ == '__main__':
         finally:
             time.sleep(10) # Wait for the server to finish and then kill the process
             if th.is_alive():
-                th.terminate()
+                th.kill()
 
     print(f"(Auto-Exec): EXPERIMENT FINISHED: {exp_name}")
     OpenAICostLoggerViz.print_experiment_cost(experiment=exp_name, path=log_path)
