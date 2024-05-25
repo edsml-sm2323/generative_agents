@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import gc
 import os
 import sys
 import time
@@ -7,12 +8,15 @@ import shutil
 import reverie
 import argparse
 import webbrowser
+import subprocess
 from typing import Tuple
 from pathlib import Path
 from datetime import datetime
 from multiprocessing import Process
 from openai_cost_logger import OpenAICostLoggerViz
 
+# Set the pid global variable
+pid = None
 
 def parse_args() -> Tuple[str, str, int, bool]:
     """Parse bash arguments
@@ -103,7 +107,29 @@ def start_web_tab(ui: bool, browser_path: str, port: str) -> None:
         if ui:
             webbrowser.get(browser_path).open(url, new=2)
         else:
-            os.system(f"google-chrome --headless --disable-gpu --remote-debugging-port=9222 {url}")
+            # os.system(f"cpulimit -l 10 -- google-chrome\
+            #             --headless=new --no-sandbox --disable-dev-shm-usage --disable-extensions --disable-plugins\
+            #             --disable-accelerated-2d-canvas --no-first-run --single-process --no-zygote\
+            #             {url}")
+            
+            command = [
+                "cpulimit", "-l", "20", "--",
+                "google-chrome",
+                "--headless=new",
+                "--no-sandbox",
+                "--disable-dev-shm-usage",
+                "--disable-extensions",
+                "--disable-plugins",
+                "--disable-accelerated-2d-canvas",
+                "--no-first-run",
+                "--single-process",
+                "--no-zygote",
+                url
+            ]
+
+            process = subprocess.Popen(command)
+            pid = process.pid
+            print(f"(Auto-Exec): Web tab process started with pid {pid}", flush=True)
     except Exception as e:
         print(e, flush=True)
 
@@ -157,7 +183,7 @@ if __name__ == '__main__':
     print(f"(Auto-Exec): Origin: {origin}", flush=True)
     print(f"(Auto-Exec): Target: {target}", flush=True)
     print(f"(Auto-Exec): Total steps: {tot_steps}", flush=True)
-    print(f"(Auto-Exec): Checkpoint Freq: {checkpoint_freq}", flush=True)
+    print(f"(Auto-Exec): Checkpoint Freq: {checkpoint_freq}", flush=True)    
         
     while current_step < tot_steps:
         try:
@@ -191,6 +217,12 @@ if __name__ == '__main__':
                 th.kill()
                 th.join()
                 th.close()
+                gc.collect()
+                
+                if pid is not None:
+                    os.system(f"kill -9 {pid}")
+                    pid = None
+                
                 print(f"(Auto-Exec): Web tab process killed", flush=True)
 
     print(f"(Auto-Exec): EXPERIMENT FINISHED: {exp_name}")

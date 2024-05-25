@@ -263,6 +263,7 @@ def process_environment(request):
 
   with open(f"storage/{sim_code}/environment/{step}.json", "w") as outfile:
     outfile.write(json.dumps(environment, indent=2))
+    outfile.flush()
 
   return HttpResponse("received")
 
