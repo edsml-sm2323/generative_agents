@@ -369,8 +369,14 @@ def run_gpt_prompt_task_decomp(persona,
         _cr += [" ".join([j.strip () for j in i.split(" ")][3:])]
       else: 
         _cr += [i]
-    for count, i in enumerate(_cr): 
-      k = [j.strip() for j in i.split("(duration in minutes:")]
+    for count, i in enumerate(_cr):
+      # Sometimes the simulation fails because it doesn't contain
+      # `duration in minutes` but only `duration`.
+      if "duration in minutes" in i: 
+        k = [j.strip() for j in i.split("(duration in minutes:")]
+      else:
+        k = [j.strip() for j in i.split("(duration:")]
+      # k = [j.strip() for j in i.split("(duration in minutes:")]
       task = k[0]
       if task[-1] == ".": 
         task = task[:-1]
