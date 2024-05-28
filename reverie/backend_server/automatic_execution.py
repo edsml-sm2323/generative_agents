@@ -166,7 +166,7 @@ def save_checkpoint(rs, idx: int, th: Process) -> Tuple[str, int, int]:
     
 
 if __name__ == '__main__':
-    checkpoint_freq = 2 # 1 step = 10 sec
+    checkpoint_freq = 200 # 1 step = 10 sec
     log_path = "cost-logs" # where the simulations' prints are stored
     idx = 0
     origin, target, tot_steps, ui, browser_path, port = parse_args()

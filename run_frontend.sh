@@ -17,4 +17,4 @@ else
     PORT=$1
 fi
 
-python ${FRONTEND_SCRIPT_FILE} runserver ${PORT}
+python3 ${FRONTEND_SCRIPT_FILE} runserver ${PORT}
