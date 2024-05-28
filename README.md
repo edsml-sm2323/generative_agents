@@ -14,7 +14,9 @@ Since the project is no longer officially supported, I decided to develop some n
 - [x] Set **cost upperbound** and stop the experiment when it is reached
 - [x] New models and OpenAI API support
 - [x] Added [skip-morning-s-14](https://github.com/drudilorenzo/generative_agents/tree/fix-and-improve/environment/frontend_server/storage/skip-morning-s-14): a simulation based on `base_the_ville_n25` that starts after 3000 steps (~8:00am). That permits us to save time and see interactions and actions earlier.
-- [x] **Zoom in**/**Zoom out** using Z and X 
+- [x] **Zoom in**/**Zoom out** using Z and X
+- [x] [Powerful automated script](#step-3-automatic-execution) for enhanced simulation performance.
+
 
 ## Setting Up The Environment
 
@@ -26,6 +28,7 @@ Do not change the env name to be able to use the bash scripts later.
     conda activate simulacra
     pip install -r requirements.txt
 ```
+
 
 ### Step 2. OpenAI Config
 
@@ -82,12 +85,17 @@ Be aware that the only supported clients are **azure** and **openai**.\
 The generation and the embedding models are configured separately to be able to use different clients.\
 Change also the `cost-upperbound` according to your needs (the cost computation is done using "[openai-cost-logger](https://github.com/drudilorenzo/openai-cost-logger)" and the costs are specified per million tokens).
 
+
 ## Running a simulation
+
+> All the following scripts automatically activate a conda environment called `simulacra` using a conda installation at the following path: `/home/${USER}/anaconda3/bin/activate`.\
+> You may want to change this line in case you are using a different conda installation/conda environment.
 
 ### Step 1. Starting the Environment Server
 ```bash
-    ./run_frontend.sh
+    ./run_frontend.sh <PORT-NUMBER>
 ```
+ >Note: omit the port number to use the default 8000.
 
 ### Step 2. Starting the Simulation Server
 ```bash
@@ -96,6 +104,23 @@ Change also the `cost-upperbound` according to your needs (the cost computation 
 Example:
 ```bash
     ./run_backend.sh base_the_ville_isabella_maria_klaus simulation-test
+```
+
+### Step 3. Automatic Execution
+The following script offer a range of enhanced features:
+- `Automatic Saving`: The simulation automatically saves progress every 200 steps, ensuring you never lose data.
+- `Error Recovery`: In the event of an error, the simulation automatically resumes by stepping back and restarting from the last successful point. This is crucial as the model relies on formatted answers, which can sometimes cause exceptions.
+- `Automatic Tab Opening`: A new browser tab will automatically open when necessary.
+- `Headless Mode`: The scripts support running simulations in Chrome's headless mode, enabling execution on a server without a UI (it needs [headless-chrome](https://developer.chrome.com/blog/headless-chrome) installed.
+- `Configurable Port Number`: You can configure the port number as needed.
+
+For more details, refer to: [run_backend_automatic.sh](https://github.com/drudilorenzo/generative_agents/blob/fix-and-improve/run_backend_automatic.sh) and [automatic_execution.py](https://github.com/drudilorenzo/generative_agents/blob/fix-and-improve/reverie/backend_server/automatic_execution.py).
+```bash
+    ./run_backend_automatic.sh -o <ORIGIN> -t <TARGET> -s <STEPS> --ui <True|False> -p <PORT> --browser_path <BROWSER-PATH>
+```
+Example:
+```bash
+    ./run_backend_automatic.sh -o base_the_ville_isabella_maria_klaus -t test_1 -s 4 --ui False
 ```
 
 ### Endpoint list
@@ -138,8 +163,3 @@ See all the details of your expenses using the notebook "[cost_viz.ipynb](https:
 - **N. Agents**: 25
 - **Steps**: ~8650 (full day)
 - **Final Cost**: ~18.5 USD
-
-## TO-FIX/TO-BE-DONE
-Although this repo contains numerous fixes, here are some problems that have not yet been resolved or new features I would like to add:
-- [ ] joonspk-research/generative_agents#111: Still have to understand when it happens (in my case it happens after lots of steps like 4/5000) - [screen](https://github.com/drudilorenzo/generative_agents/blob/main/current-bugs/1.png)
-- [ ] joonspk-research/generative_agents#27: Add zoom in/out
