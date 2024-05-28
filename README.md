@@ -17,6 +17,12 @@ Since the project is no longer officially supported, I decided to develop some n
 - [x] **Zoom in**/**Zoom out** using Z and X
 - [x] [Powerful automated script](#step-3-automatic-execution) for enhanced simulation performance.
 
+_______________________________________
+## Index:
+1. [Setup](#setting-up-the-environment)
+2. [Execution](#running-a-simulation)
+3. [Cost-Tracking](#cost-tracking)
+_______________________________________
 
 ## Setting Up The Environment
 
