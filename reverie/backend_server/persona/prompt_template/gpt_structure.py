@@ -304,7 +304,7 @@ def safe_generate_response(prompt,
       pass
   return fail_safe_response
 
-
+# TODO：修复embedding api
 def get_embedding(text, model=llm_config["embeddings"]):
   text = text.replace("\n", " ")
   if not text: 
