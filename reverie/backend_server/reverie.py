@@ -169,6 +169,9 @@ class ReverieServer:
     with open(f"{fs_temp_storage}/curr_step.json", "w") as outfile: 
       outfile.write(json.dumps(curr_step, indent=2))
 
+    # 创建movement文件夹
+    os.makedirs(f"{sim_folder}/movement/", exist_ok=True)  # exist_ok=True 可以防止文件夹已存在时抛出错误
+
 
   def save(self): 
     """
