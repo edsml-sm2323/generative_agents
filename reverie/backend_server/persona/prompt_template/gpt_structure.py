@@ -8,6 +8,9 @@ import time
 import json
 from pathlib import Path
 from openai import AzureOpenAI, OpenAI
+import json
+from pathlib import Path
+from openai import AzureOpenAI, OpenAI
 
 from utils import *
 from openai_cost_logger import DEFAULT_LOG_PATH
@@ -120,6 +123,7 @@ cost_logger = OpenAICostLogger_Singleton(
 
 def temp_sleep(seconds=0.1):
   time.sleep(seconds)
+
 
 
 def ChatGPT_single_request(prompt): 
@@ -244,6 +248,7 @@ def GPT_request(prompt, gpt_parameter):
     response = client.chat.completions.create(
                 model=gpt_parameter["engine"],
                 messages=messages,
+                messages=messages,
                 temperature=gpt_parameter["temperature"],
                 max_tokens=gpt_parameter["max_tokens"],
                 top_p=gpt_parameter["top_p"],
@@ -298,6 +303,15 @@ def safe_generate_response(prompt,
 
   for i in range(repeat): 
     curr_gpt_response = GPT_request(prompt, gpt_parameter)
+    try:
+      if func_validate(curr_gpt_response, prompt=prompt): 
+        return func_clean_up(curr_gpt_response, prompt=prompt)
+      if verbose: 
+        print ("---- repeat count: ", i, curr_gpt_response)
+        print (curr_gpt_response)
+        print ("~~~~")
+    except:
+      pass
     try:
       if func_validate(curr_gpt_response, prompt=prompt): 
         return func_clean_up(curr_gpt_response, prompt=prompt)
