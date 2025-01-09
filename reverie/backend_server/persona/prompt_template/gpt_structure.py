@@ -20,6 +20,11 @@ from sparkai.core.messages import ChatMessage
 from persona.prompt_template.sparkai_embedding import get_sparkai_embedding
 from sparkai.embedding.spark_embedding import Embeddingmodel
 
+# # 设置代理环境变量,以便VPN起作用
+# import os
+# os.environ["HTTP_PROXY"] = "http://127.0.0.1:7890"
+# os.environ["HTTPS_PROXY"] = "http://127.0.0.1:7890"
+
 config_path = Path("../../llm_config.json")
 with open(config_path, "r") as f:
     llm_config = json.load(f) 
@@ -309,9 +314,14 @@ def get_embedding(text, model=llm_config["embeddings"]):
   text = text.replace("\n", " ")
   if not text: 
     text = "this is blank"
+  print("嵌入向量化输入：",text)
   # 如果是星火大模型的文本向量化
   if llm_config["embeddings-client"] == "sparkai":
-    # response = get_sparkai_embedding(text=text,appid=llm_config["sparkai-app-id"], apikey=llm_config["sparkai-api-key"],apisecret=llm_config["sparkai-api-secret"])
+    # version-1
+    # response = embeddings_client.embedding(text=text, kind='text')
+    # print("嵌入向量化输出：",response)
+    # return response
+
     # version-2
     # for attempt in range(3):
     #   try:
@@ -321,7 +331,10 @@ def get_embedding(text, model=llm_config["embeddings"]):
     #   except ValueError as e:
     #       print(f"Attempt {attempt+1} failed: {e}")
     #       time.sleep(2)  # Wait before retrying
-    response = embeddings_client.embedding(text=text, kind='text')
+
+    # version-3
+    response = get_sparkai_embedding(text=text,style=llm_config["embeddings-domin"])
+    # print("嵌入向量化输出：",response)
     return response
   else:
     response = embeddings_client.embeddings.create(input=[text], model=model)

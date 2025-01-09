@@ -20,6 +20,11 @@ from sparkai.core.messages import ChatMessage
 
 from sparkai_embedding import get_sparkai_embedding
 
+# 设置代理环境变量,以便VPN起作用
+import os
+os.environ["HTTP_PROXY"] = "http://127.0.0.1:7890"
+os.environ["HTTPS_PROXY"] = "http://127.0.0.1:7890"
+
 # 加载配置文件
 config_path = Path("../../../../llm_config.json")
 with open(config_path, "r") as f:

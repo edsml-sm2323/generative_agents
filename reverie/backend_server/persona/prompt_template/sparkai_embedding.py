@@ -24,6 +24,13 @@ from sparkai.embedding.spark_embedding import Embeddingmodel, SparkEmbeddingFunc
 import chromadb
 
 
+# 加载配置文件
+from pathlib import Path
+# config_path = Path("../../../../llm_config.json")
+config_path = Path("../../llm_config.json")
+with open(config_path, "r") as f:
+    llm_config = json.load(f) 
+
 class AssembleHeaderException(Exception):
     def __init__(self, msg):
         self.message = msg
@@ -116,18 +123,33 @@ def get_Body(appid,text,style):
         }
     }
     }
-    # print(body)
     return body
 
+# desc = {"messages":[{"content":"cc","role":"user"}]}
+def convet_text_to_dict(text):
+    dtext = {}
+    dtext["content"]=text
+    dtext["role"]="user"
+    return dtext
+
+
+def convet_dict_to_message(msg):
+    demessage = {}
+    demessage["messages"] = [msg]
+    return demessage
 
 
 # 发起请求并返回结果（通过style设置获取的类型）
 def get_embqp_embedding(text,appid,apikey,apisecret, style):
-    host = 'https://emb-cn-huabei-1.xf-yun.com/'
+    host = llm_config["embeddings"]
     url = assemble_ws_auth_url(host,method='POST',api_key=apikey,api_secret=apisecret)
+    text = convet_text_to_dict(text)
+    text = convet_dict_to_message(text)
+    # print("传入的message:",text)
     content = get_Body(appid,text,style) # style指定向量化的类型
     # print(time.time())
     response = requests.post(url,json=content,headers={'content-type': "application/json"}).text
+    # print("请求结果：",response)
     # print(time.time())
     return response
 
@@ -139,6 +161,7 @@ def parser_Message(message):
     code = data['header']['code']
     if code != 0:
         print(f'请求错误: {code}, {data}')
+        return []
     else:
         sid = data['header']['sid']
         # print("本次会话的id为：" + sid)
@@ -152,28 +175,31 @@ def parser_Message(message):
         # 使用np.frombuffer()函数将text_data转换为浮点数数组text，数据类型为dt。
         text = np.frombuffer(text_data, dtype=dt)
 
-        # # 打印向量维度
-        # print(len(text))
-
-        print("返回的向量化数组为:")
-        print(text)
-        return text
+        return text.tolist()
     
-def get_sparkai_embedding(text,appid,apikey,apisecret,style="para"):
-    res = get_embqp_embedding(text=text,appid=appid,apikey=apikey,apisecret=apisecret,style=style)
+# 复合函数以便其他调用
+def get_sparkai_embedding(text,style="para"):
+    APPID =llm_config["sparkai-app-id"]
+    APIKEY = llm_config["sparkai-api-key"]
+    APISecret = llm_config["sparkai-api-secret"]
+    res = get_embqp_embedding(text=text,appid=APPID,apikey=APIKEY,apisecret=APISecret,style=style)
     return parser_Message(res)
 
 
-# if __name__ == '__main__':
-#     #运行前请配置以下鉴权三要素，获取途径：https://console.xfyun.cn/services/bm3
-#     APPID ='eac29dad'
-#     APISecret = 'N2QzNDg0ODEwZjA5MTVhYzAyZjIzNmQ0'
-#     APIKEY = '9d4ccbbc9701104f467d8bc533032ce3'
-#     desc = {"messages":[{"content":"这段话的内容变成向量化是什么样的","role":"user"}]}
-#     # 当上传文档时 ，需要将文本切分为多块，然后将切分的chunk 填充到上面的content中
-#     # get_embqp_embedding   是将文本、知识库内容进行向量化的服务
-#     res = get_embqp_embedding(text=desc,appid=APPID,apikey=APIKEY,apisecret=APISecret,style="para")
-#     parser_Message(res)
+if __name__ == '__main__':
+    #运行前请配置以下鉴权三要素，获取途径：https://console.xfyun.cn/services/bm3
+    APPID =llm_config["sparkai-app-id"]
+    APIKEY = llm_config["sparkai-api-key"]
+    APISecret = llm_config["sparkai-api-secret"]
+    # desc = {"messages":[{"content":"refrigerator is idle","role":"user"}]}
+    desc = "refrigerator is idle"
+    # 当上传文档时 ，需要将文本切分为多块，然后将切分的chunk 填充到上面的content中
+    # get_embqp_embedding   是将文本、知识库内容进行向量化的服务
+    res = get_embqp_embedding(text=desc,appid=APPID,apikey=APIKEY,apisecret=APISecret,style="para")
+    text = parser_Message(res)
+    print("返回的向量化数组为:")
+    print(text)
+    print("向量维度为：",len(text))
 
 
 def test_embedding():
@@ -181,13 +207,13 @@ def test_embedding():
         spark_embedding_app_id="eac29dad",
         spark_embedding_api_key="9d4ccbbc9701104f467d8bc533032ce3",
         spark_embedding_api_secret="N2QzNDg0ODEwZjA5MTVhYzAyZjIzNmQ0",
-        spark_embedding_domain="para",
+        spark_embedding_domain="query",
     )
     # desc = {"messages":[{"content":"cc","role":"user"}]}
-    desc = {"content": "cc", "role": "user"}
+    desc = {"content": "closet is idle", "role": "user"}
     # 调用embedding方法
     a = model.embedding(text=desc, kind='text')
-    # print(len(a))
+    print("向量维度为：",len(a))
     print(a)
 
 
@@ -220,6 +246,6 @@ def test_chroma_embedding():
     print(results)  # 查询结果
 
 
-if __name__ == "__main__":
-    test_embedding()
-    # test_chroma_embedding()
+# if __name__ == "__main__":
+#     test_embedding()
+#     # test_chroma_embedding()

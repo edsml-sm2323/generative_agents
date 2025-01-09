@@ -15,6 +15,11 @@ from utils import *
 from openai_cost_logger import DEFAULT_LOG_PATH
 from persona.prompt_template.openai_logger_singleton import OpenAICostLogger_Singleton
 
+# 设置代理环境变量,以便VPN起作用
+import os
+os.environ["HTTP_PROXY"] = "http://127.0.0.1:7890"
+os.environ["HTTPS_PROXY"] = "http://127.0.0.1:7890"
+
 config_path = Path("../../openai_config.json")
 with open(config_path, "r") as f:
     openai_config = json.load(f) 
@@ -266,11 +271,13 @@ def safe_generate_response(prompt,
 
 
 def get_embedding(text, model=openai_config["embeddings"]):
+  print("嵌入向量化输入：",text)
   text = text.replace("\n", " ")
   if not text: 
     text = "this is blank"
   response = embeddings_client.embeddings.create(input=[text], model=model)
   cost_logger.update_cost(response=response, input_cost=openai_config["embeddings-costs"]["input"], output_cost=openai_config["embeddings-costs"]["output"])
+  print("嵌入向量化输出：",response.data[0].embedding)
   return response.data[0].embedding
 
 
