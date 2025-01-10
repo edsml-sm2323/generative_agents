@@ -5,6 +5,7 @@ File: global_methods.py
 Description: Contains functions used throughout my projects.
 """
 import random
+import re
 import string
 import csv
 import time
@@ -223,6 +224,12 @@ def copyanything(src, dst):
     if exc.errno in (errno.ENOTDIR, errno.EINVAL):
       shutil.copy(src, dst)
     else: raise
+
+
+def clean_json_tags(response):
+  # 移除多余的反引号和 json 标签
+  cleaned_response = re.sub(r'```json|```', '', response).strip()
+  return cleaned_response
 
 
 if __name__ == '__main__':

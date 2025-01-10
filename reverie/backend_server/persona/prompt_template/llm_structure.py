@@ -4,11 +4,11 @@ Author: Joon Sung Park (joonspk@stanford.edu)
 File: gpt_structure.py
 Description: Wrapper functions for calling OpenAI and other LLM APIs including sparkai's Spark model.
 """
+import re
 import time 
 import json
 from pathlib import Path
 from openai import AzureOpenAI, OpenAI
-import requests
 
 # from utils import *
 # from openai_cost_logger import DEFAULT_LOG_PATH
@@ -173,28 +173,6 @@ def OpenaiAAzure_request(prompt):
   except Exception as e: 
     print(f"Error: {e}")
     return "ChatGPT ERROR"
-  
-def Sparkai_request(prompt):
-  """使用科大讯飞星火大模型 API 发送请求。
-
-  Args:
-      prompt (str): 要发送的提示。
-
-  Returns:
-      str: 星火大模型的响应内容。
-  """
-  try: 
-    messages = [ChatMessage(
-        role="user",
-        content=prompt
-    )]
-    handler = ChunkPrintHandler()
-    response = client.generate([messages], callbacks=[handler])
-    return response.generations[0][0].text
-
-  except Exception as e: 
-    print(f"Error: {e}")
-    return "Sparkai ERROR"
   
 def ChatGPT_request(prompt):
   """根据所选模型类型调用相应的 LLM API。
@@ -421,7 +399,10 @@ def get_embedding(text, model=llm_config["embeddings"]):
 #                                  True)
 
 #   print (output)
-
+def clean_json_tags(response):
+   # 移除多余的反引号和 json 标签
+   cleaned_response = re.sub(r'```json|```', '', response).strip()
+   return cleaned_response
 
 if __name__ == '__main__':
   #  messages = [ChatMessage(
@@ -432,12 +413,24 @@ if __name__ == '__main__':
   #  response = client.generate([messages], callbacks=[handler])
   #  print(response.generations[0][0].text)
   completion = client.chat.completions.create(
-      model='4.0Ultra', # 指定请求的版本
+      model= llm_config["model"], # 指定请求的版本
       messages=[
           {
               "role": "user",
-              "content": '说一个程序员才懂的笑话'
+              "content": '''"""
+              Task: We want to understand the state of an object that is being used by someone. 
+
+              Let's think step by step. 
+              We want to know about bed's state. 
+              Step 1. Isabella Rodriguez is at/using the sleeping.
+              Step 2. Describe the bed's state: bed is
+              """
+              Output the response to the prompt above in json. The output should ONLY contain the phrase that should go in <fill in>.
+              Example output json:
+              {"output": "being fixed"}'''
           }
       ]
   )
-  print(completion.choices[0].message.content)
+  response = completion.choices[0].message.content
+  response = clean_json_tags(response)
+  print(response)

@@ -12,6 +12,7 @@ import json
 from pathlib import Path
 from openai import AzureOpenAI, OpenAI
 
+from global_methods import clean_json_tags
 from utils import *
 from openai_cost_logger import DEFAULT_LOG_PATH
 from persona.prompt_template.openai_logger_singleton import OpenAICostLogger_Singleton
@@ -184,6 +185,8 @@ def ChatGPT_safe_generate_response(prompt,
 
     try: 
       curr_gpt_response = ChatGPT_request(prompt).strip()
+      curr_gpt_response = clean_json_tags(curr_gpt_response)
+      print("更改后的gpt输出：",curr_gpt_response)
       end_index = curr_gpt_response.rfind('}') + 1
       curr_gpt_response = curr_gpt_response[:end_index]
       curr_gpt_response = json.loads(curr_gpt_response)["output"]
@@ -247,7 +250,6 @@ def GPT_request(prompt, gpt_parameter):
     }]#这里的role原始项目是system
     response = client.chat.completions.create(
                 model=gpt_parameter["engine"],
-                messages=messages,
                 messages=messages,
                 temperature=gpt_parameter["temperature"],
                 max_tokens=gpt_parameter["max_tokens"],
@@ -328,7 +330,7 @@ def get_embedding(text, model=llm_config["embeddings"]):
   text = text.replace("\n", " ")
   if not text: 
     text = "this is blank"
-  print("嵌入向量化输入：",text)
+  # print("嵌入向量化输入：",text)
   # 如果是星火大模型的文本向量化
   if llm_config["embeddings-client"] == "sparkai":
     # version-1

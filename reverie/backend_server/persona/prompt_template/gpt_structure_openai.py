@@ -140,6 +140,7 @@ def ChatGPT_safe_generate_response(prompt,
 
     try: 
       curr_gpt_response = ChatGPT_request(prompt).strip()
+      print("更改后的gpt输出：",curr_gpt_response)
       end_index = curr_gpt_response.rfind('}') + 1
       curr_gpt_response = curr_gpt_response[:end_index]
       curr_gpt_response = json.loads(curr_gpt_response)["output"]
@@ -271,13 +272,13 @@ def safe_generate_response(prompt,
 
 
 def get_embedding(text, model=openai_config["embeddings"]):
-  print("嵌入向量化输入：",text)
+  # print("嵌入向量化输入：",text)
   text = text.replace("\n", " ")
   if not text: 
     text = "this is blank"
   response = embeddings_client.embeddings.create(input=[text], model=model)
   cost_logger.update_cost(response=response, input_cost=openai_config["embeddings-costs"]["input"], output_cost=openai_config["embeddings-costs"]["output"])
-  print("嵌入向量化输出：",response.data[0].embedding)
+  # print("嵌入向量化输出：",response.data[0].embedding)
   return response.data[0].embedding
 
 

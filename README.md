@@ -168,4 +168,44 @@ See all the details of your expenses using the notebook "[cost_viz.ipynb](https:
 - **Embeddings**: "text-embedding-3-small"
 - **N. Agents**: 25
 - **Steps**: ~8650 (full day)
-- **Final Cost**: ~18.5 USD
+- **Final Cost**: ~18.5 USD     
+    
+<hr/>
+
+# Lab的fix&improve
+## 如何使用
+请添加llm_config.json在根目录如下：
+```
+{
+    "client":"sparkai", 
+    "model": "4.0Ultra",
+    "model-key": <你的openai-key>, 
+    "model-endpoint": "https://api.openai.com/v1",
+    "model-api-version": "<API-VERSION>",
+    "model-costs": {
+        "input":  0.5,
+        "output": 1.5
+    },
+    
+    "embeddings-client":"sparkai",
+    "embeddings": "https://emb-cn-huabei-1.xf-yun.com/",
+    "embeddings-key": "",
+    "embeddings-costs": {
+        "input": 0.0,
+        "output": 0.0
+    },
+    "embeddings-domin":"para",
+    
+    "sparkai-url":"wss://spark-api.xf-yun.com/v4.0/chat",
+    "sparkai-openai-url":"https://spark-api-open.xf-yun.com/v1",
+    "sparkai-apipassword":<你星火模型控制台的http访问格式的password>,
+    "sparkai-app-id":<星火大模型的应用id>,
+    "sparkai-api-secret":<星火大模型的应用secret>, 
+    "sparkai-api-key":<星火大模型的应用key>,
+    "sparkai-domin":"4.0Ultra" ,
+
+    "experiment-name": "zcj_simulation1",
+    "cost-upperbound": 10
+}
+
+```
