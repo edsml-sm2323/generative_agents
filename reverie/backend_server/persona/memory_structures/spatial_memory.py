@@ -83,6 +83,34 @@ class MemoryTree:
 
 
   def get_str_accessible_arena_game_objects(self, arena):
+    # """
+    # Get a str list of all accessible game objects that are in the arena. If 
+    # temp_address is specified, we return the objects that are available in
+    # that arena, and if not, we return the objects that are in the arena our
+    # persona is currently in. 
+
+    # INPUT
+    #   arena: arena address in the format 'world:sector:arena'
+    # OUTPUT 
+    #   str list of all accessible game objects in the game arena. 
+    # EXAMPLE STR OUTPUT
+    #   "phone, charger, bed, nightstand"
+    # """
+    # try:
+    #     curr_world, curr_sector, curr_arena = arena.split(":")
+    #     if not curr_arena:
+    #         return ""
+
+    #     x = ", ".join(list(self.tree[curr_world][curr_sector][curr_arena]))
+    # except KeyError:
+    #     try:
+    #         x = ", ".join(list(self.tree[curr_world][curr_sector][curr_arena.lower()]))
+    #     except KeyError as e:
+    #         print("Current Tree Structure:", self.tree)
+    #         print(f"KeyError: {e} - Arena '{curr_arena}' not found in the tree.")
+    #         return ""
+
+    # return x
     """
     Get a str list of all accessible game objects that are in the arena. If 
     temp_address is specified, we return the objects that are available in
@@ -102,9 +130,11 @@ class MemoryTree:
       return ""
 
     try: 
-      x = ", ".join(list(self.tree[curr_world][curr_sector][curr_arena]))
+      x = ", ".join(list(self.tree[curr_world][curr_sector][curr_arena.strip()]))
     except: 
-      x = ", ".join(list(self.tree[curr_world][curr_sector][curr_arena.lower()]))
+      # print("注意arena:",arena)
+      # print("注意tree:",list(self.tree[curr_world][curr_sector]))
+      x = ", ".join(list(self.tree[curr_world][curr_sector][curr_arena.strip().lower()]))
     return x
 
 

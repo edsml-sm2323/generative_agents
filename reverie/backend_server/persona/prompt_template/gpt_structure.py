@@ -1,3 +1,5 @@
+# 项目原件副本
+
 """
 Author: Joon Sung Park (joonspk@stanford.edu)
 
@@ -8,30 +10,19 @@ import time
 import json
 from pathlib import Path
 from openai import AzureOpenAI, OpenAI
-import json
-from pathlib import Path
-from openai import AzureOpenAI, OpenAI
 
-from global_methods import clean_json_tags
 from utils import *
-from openai_cost_logger import DEFAULT_LOG_PATH
-from persona.prompt_template.openai_logger_singleton import OpenAICostLogger_Singleton
+# from openai_cost_logger import DEFAULT_LOG_PATH
+# from persona.prompt_template.openai_logger_singleton import OpenAICostLogger_Singleton
 
-# import星火大模型
-from sparkai.llm.llm import ChatSparkLLM, ChunkPrintHandler
-from sparkai.core.messages import ChatMessage
-# import星火的嵌入api
-from persona.prompt_template.sparkai_embedding import get_sparkai_embedding
-from sparkai.embedding.spark_embedding import Embeddingmodel
-
-# # 设置代理环境变量,以便VPN起作用
+# 设置代理环境变量,以便VPN起作用
 # import os
 # os.environ["HTTP_PROXY"] = "http://127.0.0.1:7890"
 # os.environ["HTTPS_PROXY"] = "http://127.0.0.1:7890"
 
-config_path = Path("../../llm_config.json")
+config_path = Path("../../openai_config.json")
 with open(config_path, "r") as f:
-    llm_config = json.load(f) 
+    openai_config = json.load(f) 
 
 def setup_client(type: str, config: dict):
   """Setup the OpenAI client.
@@ -56,16 +47,7 @@ def setup_client(type: str, config: dict):
     client = OpenAI(
         api_key=config["key"],
     )
-  elif type == "sparkai":
-    # client=ChatSparkLLM(
-    #   spark_api_url=config["sparkai-url"],
-    #   spark_app_id=config["sparkai-app-id"],
-    #   spark_api_key=config["sparkai-api-key"],
-    #   spark_api_secret=config["sparkai-api-secret"],
-    #   spark_llm_domain=config["sparkai-domin"],
-    #   streaming=False,
-    # )
-        # 控制台获取key和secret拼接，假使控制台获取的APIPassword是123456
+  elif type == "openai-transfer":
     client = OpenAI(
         api_key = config["key"],
         base_url = config["url"] # 指向讯飞星火的请求地址
@@ -74,66 +56,50 @@ def setup_client(type: str, config: dict):
     raise ValueError("Invalid client")
   return client
 
-# 设置 OpenAI 客户端
-if llm_config["client"] == "azure":
-    client = setup_client("azure", {
-        "endpoint": llm_config["model-endpoint"],
-        "key": llm_config["model-key"],
-        "api-version": llm_config["model-api-version"],
-    })
-elif llm_config["client"] == "openai":
-    client = setup_client("openai", {"key": llm_config["model-key"]})
-elif llm_config["client"] == "sparkai":
-    # client = setup_client("sparkai", {
-    #     "sparkai-url":llm_config["sparkai-url"],
-    #     "sparkai-app-id":llm_config["sparkai-app-id"],
-    #     "sparkai-api-key":llm_config["sparkai-api-key"],
-    #     "sparkai-api-secret":llm_config["sparkai-api-secret"],
-    #     "sparkai-domin":llm_config["sparkai-domin"],
-    # })
-    client = setup_client("sparkai", {"key": llm_config["sparkai-apipassword"],
-                                      "url":llm_config["sparkai-openai-url"]})
-else:
-    raise ValueError("Invalid client type")
+if openai_config["client"] == "azure":
+  client = setup_client("azure", {
+      "endpoint": openai_config["model-endpoint"],
+      "key": openai_config["model-key"],
+      "api-version": openai_config["model-api-version"],
+  })
+elif openai_config["client"] == "openai":
+  client = setup_client("openai", { "key": openai_config["model-key"] })
+elif openai_config["client"] == "openai-transfer":
+  client = setup_client("openai-transfer", {"key": openai_config["model-key"],
+                                            "url":openai_config["url"]})
 
-# 设置嵌入客户端（如果有）
-if llm_config["embeddings-client"] == "azure":  
-    embeddings_client = setup_client("azure", {
-        "endpoint": llm_config["embeddings-endpoint"],
-        "key": llm_config["embeddings-key"],
-        "api-version": llm_config["embeddings-api-version"],
-    })
-elif llm_config["embeddings-client"] == "openai":
-    embeddings_client = setup_client("openai", {"key": llm_config["embeddings-key"]})
-elif llm_config["client"] == "sparkai": # 这部分星火的嵌入API没有client调用形式,后续更改get_embedding
-    # embeddings_client = None
-    embeddings_client = Embeddingmodel(
-        spark_embedding_app_id=llm_config["sparkai-app-id"],
-        spark_embedding_api_key=llm_config["sparkai-api-key"],
-        spark_embedding_api_secret=llm_config["sparkai-api-secret"],
-        spark_embedding_domain="para", # 可选值qurey和para
-    )
+if openai_config["embeddings-client"] == "azure":  
+  embeddings_client = setup_client("azure", {
+      "endpoint": openai_config["embeddings-endpoint"],
+      "key": openai_config["embeddings-key"],
+      "api-version": openai_config["embeddings-api-version"],
+  })
+elif openai_config["embeddings-client"] == "openai":
+  embeddings_client = setup_client("openai", { "key": openai_config["embeddings-key"] })
+elif openai_config["embeddings-client"] == "openai-transfer":
+  embeddings_client = setup_client("openai-transfer", { "key": openai_config["embeddings-key"],
+                                                      "url":openai_config["embeddings-url"]})
 else:
-    raise ValueError("Invalid embeddings client")
+  raise ValueError("Invalid embeddings client")
 
-cost_logger = OpenAICostLogger_Singleton(
-  experiment_name = llm_config["experiment-name"],
-  log_folder = DEFAULT_LOG_PATH,
-  cost_upperbound = llm_config["cost-upperbound"]
-)
+# cost_logger = OpenAICostLogger_Singleton(
+#   experiment_name = openai_config["experiment-name"],
+#   log_folder = DEFAULT_LOG_PATH,
+#   cost_upperbound = openai_config["cost-upperbound"]
+# )
+
 
 def temp_sleep(seconds=0.1):
   time.sleep(seconds)
 
 
-
 def ChatGPT_single_request(prompt): 
   temp_sleep()
   completion = client.chat.completions.create(
-    model=llm_config["model"],
+    model=openai_config["model"],
     messages=[{"role": "user", "content": prompt}]
   )
-  cost_logger.update_cost(completion, input_cost=llm_config["model-costs"]["input"], output_cost=llm_config["model-costs"]["output"])
+  # cost_logger.update_cost(completion, input_cost=openai_config["model-costs"]["input"], output_cost=openai_config["model-costs"]["output"])
   return completion.choices[0].message.content
 
 
@@ -152,12 +118,12 @@ def ChatGPT_request(prompt):
   # temp_sleep()
   try: 
     completion = client.chat.completions.create(
-    model=llm_config["model"],
+    model=openai_config["model"],
     messages=[{"role": "user", "content": prompt}]
     )
-    cost_logger.update_cost(completion, input_cost=llm_config["model-costs"]["input"], output_cost=llm_config["model-costs"]["output"])
+    # cost_logger.update_cost(completion, input_cost=openai_config["model-costs"]["input"], output_cost=openai_config["model-costs"]["output"])
     return completion.choices[0].message.content
-
+  
   except Exception as e: 
     print(f"Error: {e}")
     return "ChatGPT ERROR"
@@ -185,8 +151,6 @@ def ChatGPT_safe_generate_response(prompt,
 
     try: 
       curr_gpt_response = ChatGPT_request(prompt).strip()
-      curr_gpt_response = clean_json_tags(curr_gpt_response)
-      print("更改后的gpt输出：",curr_gpt_response)
       end_index = curr_gpt_response.rfind('}') + 1
       curr_gpt_response = curr_gpt_response[:end_index]
       curr_gpt_response = json.loads(curr_gpt_response)["output"]
@@ -246,8 +210,8 @@ def GPT_request(prompt, gpt_parameter):
   temp_sleep()
   try: 
     messages = [{
-      "role": "user", "content": prompt
-    }]#这里的role原始项目是system
+      "role": "system", "content": prompt
+    }]
     response = client.chat.completions.create(
                 model=gpt_parameter["engine"],
                 messages=messages,
@@ -258,7 +222,7 @@ def GPT_request(prompt, gpt_parameter):
                 presence_penalty=gpt_parameter["presence_penalty"],
                 stream=gpt_parameter["stream"],
                 stop=gpt_parameter["stop"],)
-    cost_logger.update_cost(response=response, input_cost=llm_config["model-costs"]["input"], output_cost=llm_config["model-costs"]["output"])
+    # cost_logger.update_cost(response=response, input_cost=openai_config["model-costs"]["input"], output_cost=openai_config["model-costs"]["output"])
     return response.choices[0].message.content
   except Exception as e:
     print(f"Error: {e}")
@@ -314,52 +278,22 @@ def safe_generate_response(prompt,
         print ("~~~~")
     except:
       pass
-    try:
-      if func_validate(curr_gpt_response, prompt=prompt): 
-        return func_clean_up(curr_gpt_response, prompt=prompt)
-      if verbose: 
-        print ("---- repeat count: ", i, curr_gpt_response)
-        print (curr_gpt_response)
-        print ("~~~~")
-    except:
-      pass
   return fail_safe_response
 
-# TODO：修复embedding api
-def get_embedding(text, model=llm_config["embeddings"]):
+
+def get_embedding(text, model=openai_config["embeddings"]):
+  # print("嵌入向量化输入：",text)
   text = text.replace("\n", " ")
   if not text: 
     text = "this is blank"
-  # print("嵌入向量化输入：",text)
-  # 如果是星火大模型的文本向量化
-  if llm_config["embeddings-client"] == "sparkai":
-    # version-1
-    # response = embeddings_client.embedding(text=text, kind='text')
-    # print("嵌入向量化输出：",response)
-    # return response
-
-    # version-2
-    # for attempt in range(3):
-    #   try:
-    #       response = embeddings_client.embedding(text=text, kind='text')
-    #       return response
-    #       break
-    #   except ValueError as e:
-    #       print(f"Attempt {attempt+1} failed: {e}")
-    #       time.sleep(2)  # Wait before retrying
-
-    # version-3
-    response = get_sparkai_embedding(text=text,style=llm_config["embeddings-domin"])
-    # print("嵌入向量化输出：",response)
-    return response
-  else:
-    response = embeddings_client.embeddings.create(input=[text], model=model)
-    cost_logger.update_cost(response=response, input_cost=llm_config["embeddings-costs"]["input"], output_cost=llm_config["embeddings-costs"]["output"])
-    return response.data[0].embedding
+  response = embeddings_client.embeddings.create(input=[text], model=model)
+  # cost_logger.update_cost(response=response, input_cost=openai_config["embeddings-costs"]["input"], output_cost=openai_config["embeddings-costs"]["output"])
+  # print("嵌入向量化输出：",response.data[0].embedding)
+  return response.data[0].embedding
 
 
 if __name__ == '__main__':
-  gpt_parameter = {"engine": llm_config["model"], "max_tokens": 50, 
+  gpt_parameter = {"engine": openai_config["model"], "max_tokens": 50, 
                    "temperature": 0, "top_p": 1, "stream": False,
                    "frequency_penalty": 0, "presence_penalty": 0, 
                    "stop": ['"']}

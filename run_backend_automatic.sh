@@ -2,7 +2,7 @@
 
 BACKEND_SCRIPT_PATH="reverie/backend_server"
 BACKEND_SCRIPT_FILE="automatic_execution.py"
-CONDA_ENV="simulacra"
+CONDA_ENV="py3.9.12"
 LOGS_PATH="../../logs"
 
 FILE_NAME="Bash-Script"

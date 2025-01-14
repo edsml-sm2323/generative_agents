@@ -2,7 +2,7 @@
 
 FRONTEND_SCRIPT_PATH="environment/frontend_server"
 FRONTEND_SCRIPT_FILE="manage.py"
-CONDA_ENV="simulacra"
+CONDA_ENV="py3.9.12"
 
 FILE_NAME="Bash-Script-Frontend"
 echo "(${FILE_NAME}): Running frontend server"

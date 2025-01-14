@@ -17,8 +17,8 @@ from persona.prompt_template.gpt_structure import *
 from persona.prompt_template.print_prompt import *
 
 # 添加配置文件
-config_path = Path("../../llm_config.json")
-# config_path = Path("../../openai_config.json")
+# config_path = Path("../../llm_config.json")
+config_path = Path("../../openai_config.json")
 with open(config_path, "r") as f:
     llm_config = json.load(f) 
 
