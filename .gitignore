@@ -1,5 +1,6 @@
 # OpenAI API key
 openai_config.json
+openai_config copy.json
 # 添加llm_config过滤
 llm_config.json
 
