@@ -43,7 +43,10 @@
           />
         </transition>
 
-        <button class="default" @click="showCreationForm = true">
+        <button class="create-button" @click="showCreationForm = true">
+          <svg xmlns="http://www.w3.org/2000/svg"  width="16" height="16" viewBox="0 0 24 24">
+            <path fill="currentColor" d="M18 12.998h-5v5a1 1 0 0 1-2 0v-5H6a1 1 0 0 1 0-2h5v-5a1 1 0 0 1 2 0v5h5a1 1 0 0 1 0 2z"/>
+          </svg>
           创建新实验
         </button>
       </div>
@@ -89,6 +92,7 @@ import ExperimentControl from '@/components/ExperimentControl.vue'
 import ExperimentFormModal from '@/components/ExperimentFormModal.vue'
 import ExperimentPlayer from '@/components/ExperimentPlayer.vue'
 import ExperimentDataPanel from '@/components/ExperimentDataPanel.vue'
+import EmptyState from '@/components/EmptyState.vue'
  
 const { showError } = useNotification()
 
@@ -269,6 +273,40 @@ const handlePlayerLoading = (loading) => {
   .simulation-container {
     grid-template-rows: 60vh auto;
     height: auto;
+  }
+}
+
+.create-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.25rem;
+  background: #3B82F6;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 500;
+  transition: all 0.2s;
+  cursor: pointer;
+}
+
+.create-button:hover {
+  background: #2563EB;
+  transform: translateY(-1px);
+}
+
+.create-button:active {
+  transform: translateY(0);
+}
+
+/* 暗色模式适配 */
+@media (prefers-color-scheme: dark) {
+  .empty-state {
+    background: rgba(15, 23, 42, 0.3);
+  }
+
+  .create-button {
+    background: #1D4ED8;
   }
 }
 </style>

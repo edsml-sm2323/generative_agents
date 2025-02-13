@@ -1,71 +1,76 @@
+<!-- src/components/Controls/SpeedControl.vue  -->
 <template>
   <div class="speed-control">
-    <label>播放速度:</label>
-    <select 
-      :value="modelValue"
-      @change="handleSpeedChange($event.target.value)" 
-    >
-      <option 
-        v-for="speed in speedOptions"
-        :key="speed"
-        :value="speed"
-      >
-        {{ speed }}x 
-      </option>
-    </select>
+    <label class="speed-label">{{ formattedSpeed }}</label>
+    <input 
+      type="range"
+      :min="min"
+      :max="max"
+      :step="step"
+      class="slider"
+      v-model="modelValue"
+    />
   </div>
 </template>
  
 <script setup>
-import { defineProps, defineEmits } from 'vue'
+import { computed, defineProps, defineEmits } from 'vue'
+ 
+const props = defineProps({
+  modelValue: { type: Number, default: 1 },
+  min: { type: Number, default: 0.5 },
+  max: { type: Number, default: 3 },
+  step: { type: Number, default: 0.1 }
+})
  
 const emit = defineEmits(['update:modelValue'])
  
-const props = defineProps({
-  modelValue: {
-    type: Number,
-    default: 1.0 
-  }
+const modelValue = computed({
+  get: () => props.modelValue, 
+  set: (v) => emit('update:modelValue', parseFloat(v))
 })
  
-const speedOptions = [0.5, 1.0, 1.5, 2.0]
- 
-const handleSpeedChange = (value) => {
-  const numValue = parseFloat(value)
-  emit('update:modelValue', numValue)
-}
+const formattedSpeed = computed(() => {
+  const value = Math.round(modelValue.value  * 10) / 10 
+  return value % 1 === 0 ? `${value}x` : `${value.toFixed(1)}x` 
+})
 </script>
  
 <style scoped>
 .speed-control {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  background: rgba(255,255,255,0.1);
-  padding: 0.5rem 1rem;
-  border-radius: 20px;
-  transition: background 0.3s ease;
+  gap: 12px;
+  width: 120px;
 }
  
-select {
-  background: none;
-  border: none;
-  color: white;
-  padding: 0.2rem 0.5rem;
-  cursor: pointer;
+.speed-label {
+  min-width: 40px;
+  text-align: center;
+  font-size: 0.9em;
+  color: #94A3B8;
+}
+ 
+.slider {
+  flex: 1;
+  height: 4px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 2px;
   outline: none;
   appearance: none;
-  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg'  viewBox='0 0 24 24' fill='white'%3e%3cpath d='M7 10l5 5 5-5z'/%3e%3c/svg%3e");
-  background-repeat: no-repeat;
-  background-position: right 0.2rem center;
-  padding-right: 1.5rem;
 }
  
-select:hover {
-  background-color: rgba(255,255,255,0.1);
+.slider::-webkit-slider-thumb {
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  background: #3B82F6;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: transform 0.2s;
 }
  
-select:focus {
-  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5);
+.slider::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
 }
 </style>

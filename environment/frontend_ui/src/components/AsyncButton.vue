@@ -1,72 +1,95 @@
-<!-- AsyncButton.vue  -->
+<!-- src/components/Controls/AsyncButton.vue  -->
 <template>
-    <button 
-      class="async-button"
-      :class="[
-        variantClass,
-        { 'loading': loading }
-      ]"
-      :disabled="disabled || loading"
-    >
-      <span class="content">
-        <slot v-if="!loading" name="default"></slot>
-        <slot v-else name="loading"></slot>
-      </span>
-    </button>
-  </template>
-   
-  <script setup>
-import { computed, props, defineProps } from 'vue'
-
-  defineProps({
-    loading: Boolean,
-    disabled: Boolean,
-    variant: {
-      type: String,
-      default: 'primary',
-      validator: v => ['primary', 'success', 'danger'].includes(v)
-    }
-  })
-   
-  const variantClass = computed(() => `variant-${props.variant}`) 
-  </script>
-   
-  <style scoped>
-  .async-button {
-    padding: 0.6rem 1.2rem;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: all 0.2s;
+  <button 
+    class="async-button"
+    :class="[variant, { loading }]"
+    :disabled="loading"
+    @click="handleClick"
+  >
+    <span class="button-content">
+      <progress-spinner 
+        v-if="loading"
+        :size="16"
+        :stroke-width="2"
+        class="spinner"
+      />
+      <slot />
+    </span>
+  </button>
+</template>
+ 
+<script setup>
+import { ref, defineProps, defineEmits } from 'vue'
+ 
+const props = defineProps({
+  variant: {
+    type: String,
+    default: 'primary',
+    validator: v => ['primary', 'secondary'].includes(v)
+  },
+  disabled: Boolean 
+})
+ 
+const emit = defineEmits(['click'])
+const loading = ref(false)
+ 
+const handleClick = async (e) => {
+  if (props.disabled  || loading.value)  return 
+  loading.value  = true 
+  try {
+    await emit('click', e)
+  } finally {
+    loading.value  = false 
   }
-   
-  .variant-primary { background: #2196F3; color: white; }
-  .variant-success { background: #4CAF50; color: white; }
-  .variant-danger { background: #f44336; color: white; }
-   
-  .async-button:disabled {
-    opacity: 0.7;
-    cursor: not-allowed;
-  }
-   
-  .async-button.loading  {
-    position: relative;
-    cursor: progress;
-  }
-   
-  .async-button.loading::after  {
-    content: "";
-    display: inline-block;
-    width: 1em;
-    height: 1em;
-    margin-left: 0.5em;
-    border: 2px solid currentColor;
-    border-top-color: transparent;
-    border-radius: 50%;
-    animation: spin 0.8s linear infinite;
-  }
-   
-  @keyframes spin {
-    to { transform: rotate(360deg); }
-  }
-  </style>
+}
+</script>
+ 
+<style scoped>
+.async-button {
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+}
+ 
+.primary {
+  background: #3B82F6;
+  color: white;
+}
+ 
+.primary:hover:not(:disabled) {
+  background: #2563EB;
+}
+ 
+.secondary {
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.2);
+  color: #E2E8F0;
+}
+ 
+.secondary:hover:not(:disabled) {
+  background: rgba(255,255,255,0.15);
+}
+ 
+:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+ 
+.button-content {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+}
+ 
+.spinner {
+  animation: spin 1s linear infinite;
+}
+ 
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+</style>
