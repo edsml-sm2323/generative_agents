@@ -159,6 +159,55 @@ const handleControlError = (error) => {
 const handlePlayerLoading = (loading) => {
   playerLoading.value  = loading 
 }
+
+
+// 下面是实验列表相关
+// 公共实验白名单配置 
+const PUBLIC_EXPERIMENT_WHITELIST = new Set([
+  // 基础模板系列 
+  'base_the_ville_isabella_maria_klaus',
+  'base_the_ville_n25',
+  'base_the_ville_smol_elections_5_voters',
+  'base_the_ville_smol_elections_5_voters_swapped_personalities',
+ 
+  // July标准实验序列 
+  'July1_the_ville_isabella_maria_klaus-step-3-1',
+  'July1_the_ville_isabella_maria_klaus-step-3-2',
+  'July1_the_ville_isabella_maria_klaus-step-3-3',
+  'July1_the_ville_isabella_maria_klaus-step-3-4',
+  'July1_the_ville_isabella_maria_klaus-step-3-5',
+  'July1_the_ville_isabella_maria_klaus-step-3-6',
+  'July1_the_ville_isabella_maria_klaus-step-3-7',
+  'July1_the_ville_isabella_maria_klaus-step-3-8',
+  'July1_the_ville_isabella_maria_klaus-step-3-9',
+  'July1_the_ville_isabella_maria_klaus-step-3-10',
+  'July1_the_ville_isabella_maria_klaus-step-3-11',
+  'July1_the_ville_isabella_maria_klaus-step-3-12',
+  'July1_the_ville_isabella_maria_klaus-step-3-13',
+  'July1_the_ville_isabella_maria_klaus-step-3-14',
+  'July1_the_ville_isabella_maria_klaus-step-3-15',
+  'July1_the_ville_isabella_maria_klaus-step-3-16',
+  'July1_the_ville_isabella_maria_klaus-step-3-17',
+  'July1_the_ville_isabella_maria_klaus-step-3-18',
+  'July1_the_ville_isabella_maria_klaus-step-3-19',
+  'July1_the_ville_isabella_maria_klaus-step-3-20',
+  'July1_the_ville_isabella_maria_klaus-step-3-21'
+]);
+ 
+// 实验验证函数 
+export const isPublicExperiment = (expName) => {
+  return PUBLIC_EXPERIMENT_WHITELIST.has(expName); 
+}
+ 
+// 实验过滤器示例 
+export const filterPublicExperiments = (experiments) => {
+  return experiments.filter(exp  => 
+    PUBLIC_EXPERIMENT_WHITELIST.has(exp.name)  ||
+    exp.name.startsWith('base_the_ville') 
+  );
+}
+
+
 </script>
 
 <style scoped>
