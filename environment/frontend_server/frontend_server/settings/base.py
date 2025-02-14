@@ -43,14 +43,19 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
-    'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    # 'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'corsheaders.middleware.CorsMiddleware',
+    # 安全相关中间件优先 
+    'django.middleware.security.SecurityMiddleware', 
+
+    # CORS中间件必须紧接安全中间件之后 
+    'corsheaders.middleware.CorsMiddleware',   # ← 关键位置 
+
+    # 后续中间件按功能顺序排列 
+    'django.contrib.sessions.middleware.SessionMiddleware', 
+    'django.middleware.common.CommonMiddleware', 
+    # 'django.middleware.csrf.CsrfViewMiddleware', 
+    'django.contrib.auth.middleware.AuthenticationMiddleware', 
+    'django.contrib.messages.middleware.MessageMiddleware', 
+    'django.middleware.clickjacking.XFrameOptionsMiddleware', 
 ]
 
 ROOT_URLCONF = 'frontend_server.urls'
@@ -139,9 +144,45 @@ MEDIA_ROOT = os.path.join(os.path.dirname(BASE_DIR), "media_root")
 # CORS_ALLOW_CREDENTIALS = False
 
 
+# 实验存储配置 
+EXPERIMENT_STORAGE_ROOT = os.path.join(BASE_DIR,  'storage')
+ 
+# 公共实验白名单 
+PUBLIC_EXPERIMENT_WHITELIST = [
+    # 基础模板系列 
+    'base_the_ville_isabella_maria_klaus',
+    'base_the_ville_n25',
+    'base_the_ville_smol_elections_5_voters',
+    'base_the_ville_smol_elections_5_voters_swapped_personalities',
 
+    # July标准实验序列 
+    'July1_the_ville_isabella_maria_klaus-step-3-1',
+    'July1_the_ville_isabella_maria_klaus-step-3-2',
+    'July1_the_ville_isabella_maria_klaus-step-3-3',
+    'July1_the_ville_isabella_maria_klaus-step-3-4',
+    'July1_the_ville_isabella_maria_klaus-step-3-5',
+    'July1_the_ville_isabella_maria_klaus-step-3-6',
+    'July1_the_ville_isabella_maria_klaus-step-3-7',
+    'July1_the_ville_isabella_maria_klaus-step-3-8',
+    'July1_the_ville_isabella_maria_klaus-step-3-9',
+    'July1_the_ville_isabella_maria_klaus-step-3-10',
+    'July1_the_ville_isabella_maria_klaus-step-3-11',
+    'July1_the_ville_isabella_maria_klaus-step-3-12',
+    'July1_the_ville_isabella_maria_klaus-step-3-13',
+    'July1_the_ville_isabella_maria_klaus-step-3-14',
+    'July1_the_ville_isabella_maria_klaus-step-3-15',
+    'July1_the_ville_isabella_maria_klaus-step-3-16',
+    'July1_the_ville_isabella_maria_klaus-step-3-17',
+    'July1_the_ville_isabella_maria_klaus-step-3-18',
+    'July1_the_ville_isabella_maria_klaus-step-3-19',
+    'July1_the_ville_isabella_maria_klaus-step-3-20',
+    'July1_the_ville_isabella_maria_klaus-step-3-21'
+]
 
-
-
-
-
+# s缓存优化
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',  # 内存缓存
+        'LOCATION': 'unique_cache',
+    }
+}
