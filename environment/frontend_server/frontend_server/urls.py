@@ -32,4 +32,5 @@ urlpatterns = [
     url(r'^path_tester/$', translator_views.path_tester, name='path_tester'),
     url(r'^path_tester_update/$', translator_views.path_tester_update, name='path_tester_update'),
     path('admin/', admin.site.urls),
+    path('epitome/', include('integration_core.urls')),  # 包含 integration_core 子应用的 URL 配置
 ]

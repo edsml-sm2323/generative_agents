@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'translator',
     'corsheaders',
     'storages',
+    'integration_core', # 用于集成到epitome平台的web页面
 ]
 
 MIDDLEWARE = [
