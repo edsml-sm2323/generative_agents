@@ -36,11 +36,12 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
-    'django.contrib.staticfiles',
     'translator',
     'corsheaders',
     'storages',
-    'integration_core', # 用于集成到epitome平台的web页面
+    'rest_framework', 
+    'drf_yasg',  # 必须添加 
+    'django.contrib.staticfiles',   # 必须启用 
 ]
 
 MIDDLEWARE = [
@@ -80,7 +81,7 @@ TEMPLATES = [
 WSGI_APPLICATION = 'frontend_server.wsgi.application'
 
 
-# Database
+# Database'rest_framework', 
 # https://docs.djangoproject.com/en/2.2/ref/settings/#databases
 
 DATABASES = {

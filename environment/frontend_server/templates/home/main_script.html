@@ -1,4 +1,4 @@
-{% load staticfiles %}
+{% load static %}
 
 <div id="step" style="display:none">{{step}}</div>
 <div id="sim_code" style="display:none">{{sim_code}}</div>
@@ -560,11 +560,31 @@
 
 	    execute_count = execute_count - 1;
 	  }
+	  // 捕获每一帧的画面
+	  if (captureFrames) {  // captureFrames 是你控制是否开始捕获帧的标志
+			const canvas = this.sys.game.canvas;
+			const imageData = canvas.toDataURL("image/png");
+
+			// 将图像数据发送到后端保存
+			sendFrameToServer(imageData);
+		}
 	}
 
 	// Control button binders
 	var play_button=document.getElementById("play_button");
 	var pause_button=document.getElementById("pause_button");
+
+	// 自适应缩放逻辑 
+	function resizeGame() {
+		const gameCanvas = document.querySelector('canvas'); 
+		if (gameCanvas) {
+			gameCanvas.style.width  = '100%';
+			gameCanvas.style.height  = 'auto';
+		}
+	}
+
+	window.addEventListener('resize',  resizeGame);
+	resizeGame();
 </script>
 
 

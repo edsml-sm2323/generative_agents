@@ -24,6 +24,27 @@ from django.contrib  import admin
 from django.conf  import settings 
 from django.conf.urls.static  import static 
 from translator import views as translator_views 
+
+from rest_framework import permissions
+from drf_yasg import openapi
+from drf_yasg.views import get_schema_view
+from rest_framework.permissions import AllowAny
+from integration_core.views import ExperimentListView  # 引入 ExperimentListView 视图集
+
+
+# 配置 Swagger Schema
+schema_view = get_schema_view(
+   openapi.Info(
+      title="epitome平台集成斯坦福小镇 API",
+      default_version='v1',
+      description="Test description",
+      terms_of_service="https://www.google.com/policies/terms/",
+      contact=openapi.Contact(email="contact@myapi.local"),
+      license=openapi.License(name="BSD License"),
+   ),
+   public=True,
+   permission_classes=[permissions.AllowAny],
+)
  
 urlpatterns = [
     # 使用re_path保持正则表达式匹配 
@@ -58,6 +79,8 @@ urlpatterns = [
     
     # 第三方集成路径 
     path('epitome/', include('integration_core.urls')), 
+    path('swagger/', schema_view.with_ui('swagger',  cache_timeout=60), name='swagger-ui'),
+    path('redoc/', schema_view.with_ui('redoc',  cache_timeout=60), name='redoc-ui'),
 ]
  
 # 开发环境静态文件服务配置 

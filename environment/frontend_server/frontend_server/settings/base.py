@@ -36,10 +36,12 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
-    'django.contrib.staticfiles',
     'translator',
     'corsheaders',
     'storages',
+    'rest_framework', 
+    'drf_yasg',  # 必须添加 
+    'django.contrib.staticfiles',   # 必须启用 
 ]
 
 MIDDLEWARE = [
@@ -179,10 +181,15 @@ PUBLIC_EXPERIMENT_WHITELIST = [
     'July1_the_ville_isabella_maria_klaus-step-3-21'
 ]
 
-# s缓存优化
+#添加缓存配置示例
 CACHES = {
     'default': {
-        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',  # 内存缓存
-        'LOCATION': 'unique_cache',
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache', 
+        'LOCATION': 'experiment-cache',
+        'TIMEOUT': 300,
+        'OPTIONS': {
+            'MAX_ENTRIES': 1000
+        }
     }
 }
+X_FRAME_OPTIONS = 'ALLOWALL'
