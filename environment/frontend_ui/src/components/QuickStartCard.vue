@@ -11,8 +11,8 @@
           {{ step }}
         </li>
       </ol>
-      <button @click="$emit('create')" class="create-button">
-        新建实验 
+      <button @click="this.$router.push('/test')" class="create-button">
+        视频播放 
       </button>
     </div>
   </template>

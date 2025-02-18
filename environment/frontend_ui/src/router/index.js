@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import StanfordTownView from '@/views/StanfordTownView.vue' 
+import TestView from '@/views/TestView.vue'
  
 const routes = [
   {
@@ -7,6 +8,12 @@ const routes = [
     name: 'StanfordTown',
     component: StanfordTownView,
     meta: { title: '斯坦福小镇模拟' }
+  },
+  {
+    path: '/test',
+    name: 'test',
+    component: TestView,
+    meta: { title: 'api测试页面' }
   }
 ]
  
