@@ -1,6 +1,8 @@
+from asyncio.log import logger
 import json
 import os
 import re
+import subprocess
 from django.core.cache  import cache
 from rest_framework.views  import APIView
 from rest_framework.response  import Response
@@ -231,19 +233,14 @@ class PhaserGameEmbedView(APIView):
         return params
 
 
-import os
-import subprocess
-from django.http import JsonResponse, HttpResponse
-from django.shortcuts import render
-from rest_framework.views import APIView
-from rest_framework.permissions import AllowAny
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
-from django.conf import settings
+from django.http import JsonResponse
 
 class VideoHLSView(APIView):
     """
-    获取视频切片并通过 HLS 协议播放接口
+    HLS视频切片生成服务接口
+    访问示例：GET /api/hls/generate/?video_path=/media/videos/source.mp4&segment_duration=10
     """
     permission_classes = [AllowAny]
 
@@ -289,48 +286,94 @@ class VideoHLSView(APIView):
 
         if not video_path or not os.path.exists(video_path):
             return JsonResponse({"error": "Invalid video path"}, status=400)
+        # # 增加视频格式验证
+        # valid_extensions = ['.mp4', '.mov', '.mkv']
+        # if not any(video_path.lower().endswith(ext) for ext in valid_extensions):
+        #     return JsonResponse(
+        #         {"error": "UNSUPPORTED_FORMAT", "message": "仅支持MP4/MOV/MKV格式"}, 
+        #         status=400
+        #     )
 
-        # 生成视频切片并创建 HLS 播放列表
-        base_path = os.path.dirname(video_path)
-        video_name = os.path.basename(video_path).split('.')[0]
-        hls_output_dir = os.path.join(base_path, f"{video_name}_hls")
-        if not os.path.exists(hls_output_dir):
-            os.makedirs(hls_output_dir)
+        # # 增加分辨率容错处理
+        # try:
+        #     probe = ffmpeg.probe(video_path)
+        #     video_stream = next(s for s in probe['streams'] if s['codec_type'] == 'video')
+        #     original_width = int(video_stream['width'])
+        #     original_height = int(video_stream['height'])
+        # except:
+        #     return JsonResponse(
+        #         {"error": "INVALID_VIDEO", "message": "无法解析视频元数据"}, 
+        #         status=400
+        #     )
 
-        m3u8_file = os.path.join(hls_output_dir, f"{video_name}.m3u8")
+        # # 自动适配分辨率
+        # if original_width % 2 != 0 or original_height % 2 != 0:
+        #     return JsonResponse(
+        #         {"error": "ODD_RESOLUTION", "message": "检测到奇数分辨率，正在自动修正..."}, 
+        #         status=400
+        #     )
 
-        # 使用 ffmpeg 将视频切割成 .ts 文件，并生成 .m3u8 播放列表
+        # 生成输出目录结构
+        video_dir = os.path.dirname(video_path)
+        base_name = os.path.splitext(os.path.basename(video_path))[0]
+        output_dir = os.path.join(video_dir, f"{base_name}_hls")
+        os.makedirs(output_dir, exist_ok=True)
+
+        # HLS转码参数
+        m3u8_path = os.path.join(output_dir, 'playlist.m3u8')
         ffmpeg_command = [
-            'ffmpeg', 
-            '-i', video_path, 
-            '-c:v', 'libx264', 
-            '-c:a', 'aac', 
-            '-strict', 'experimental', 
-            '-f', 'segment', 
-            '-segment_list', m3u8_file, 
-            '-segment_time', str(segment_duration), 
-            '-segment_format', 'mpegts', 
-            os.path.join(hls_output_dir, f'{video_name}_%03d.ts')
+            'ffmpeg',
+            '-i', video_path,
+            '-vf', "scale=ceil(iw/2)*2:ceil(ih/2)*2",  # 自动修正尺寸
+            '-c:v', 'libx264',
+            '-profile:v', 'main',
+            '-crf', '23',
+            '-preset', 'medium',
+            '-c:a', 'aac',
+            '-b:a', '128k',
+            '-f', 'hls',
+            '-hls_time', str(segment_duration),
+            '-hls_list_size', '0',
+            '-hls_segment_filename', os.path.join(output_dir, 'segment_%03d.ts'),
+            '-hls_flags', 'independent_segments',
+            m3u8_path
         ]
 
+        # 执行转码
         try:
-            subprocess.run(ffmpeg_command, check=True)
+            result = subprocess.run(
+                ffmpeg_command,
+                check=True,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+                text=True,
+                timeout=300  # 5分钟超时
+            )
+            logger.info(f"HLS转码成功: {result.stdout}")
+        except subprocess.TimeoutExpired:
+            logger.error("HLS转码超时")
+            return JsonResponse(
+                {"error": "PROCESS_TIMEOUT", "message": "视频处理超时"}, 
+                status=500
+            )
         except subprocess.CalledProcessError as e:
-            return JsonResponse({"error": "Video processing failed", "details": str(e)}, status=500)
+            logger.error(f"HLS转码失败: {e.stdout}")
+            return JsonResponse(
+                {"error": "PROCESS_FAILED", "message": "视频处理失败", "detail": e.stdout}, 
+                status=500
+            )
 
-        # 构建上下文并渲染模板
-        context = {
-            'hls_playlist_url': f"{settings.MEDIA_URL}{hls_output_dir}/{video_name}.m3u8",
-            'hls_files': self.get_hls_files(hls_output_dir)
-        }
+        # 生成访问URL
+        relative_path = os.path.relpath(m3u8_path, settings.MEDIA_ROOT)
+        m3u8_url = f"{settings.MEDIA_URL}{relative_path}"
 
-        # 返回 HLS 播放器 HTML 嵌入
-        response = render(request, 'hls_player.html', context)
-        return response
+        return JsonResponse({
+            "status": "SUCCESS",
+            "playlist_url": m3u8_url,
+            "segment_duration": segment_duration,
+            "resolution": "1280x720 (保持宽高比)",
+            "codec": "H.264 + AAC",
+            "expire_time": "24h"  # 可根据需要实现清理逻辑
+        })
 
-    def get_hls_files(self, hls_dir):
-        """返回所有切割的视频文件"""
-        ts_files = [f for f in os.listdir(hls_dir) if f.endswith('.ts')]
-        ts_files.sort()  # 按文件名排序
-        return ts_files
 
