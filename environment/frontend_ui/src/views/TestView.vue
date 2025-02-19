@@ -1,14 +1,12 @@
 <template>
   <iframe
-    src="http://127.0.0.1:8000/epitome/phaserVideo?width=800&height=600&bg_color=%231a1a1a&sim_code=July1_the_ville_isabella_maria_klaus-step-3-20&step=1"
+    src="http://127.0.0.1:8000/epitome/phaserVideo?sim_code=July1_the_ville_isabella_maria_klaus-step-3-20&step=1"
     frameborder="0"
     allow="autoplay"
     style="
       width: 100%;
       height: 100vh;
       border: none;
-      overflow-y: visible;
-      overflow-x: visible;
     "
   >
   </iframe>

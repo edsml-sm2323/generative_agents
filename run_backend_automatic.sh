@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# 跳转到脚本所在目录
+cd "$(dirname "$0")"
+
 BACKEND_SCRIPT_PATH="reverie/backend_server"
 BACKEND_SCRIPT_FILE="automatic_execution.py"
 CONDA_ENV="py3.9.12"

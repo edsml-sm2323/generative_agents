@@ -14,7 +14,7 @@ import os
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
+ROOT_DIR = os.path.dirname(os.path.dirname(BASE_DIR))
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/2.2/howto/deployment/checklist/
@@ -148,6 +148,8 @@ CORS_ORIGIN_ALLOW_ALL = True
 
 # 实验存储配置 
 EXPERIMENT_STORAGE_ROOT = os.path.join(BASE_DIR,  'storage')
+# 实验存储模版配置
+EXPERIMENT_TEMPLATES_STORAGE_ROOT = os.path.join(BASE_DIR,  'temp_storage')
  
 # 公共实验白名单 
 PUBLIC_EXPERIMENT_WHITELIST = [

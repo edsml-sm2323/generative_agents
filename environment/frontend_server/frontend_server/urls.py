@@ -81,6 +81,8 @@ urlpatterns = [
     path('epitome/', include('integration_core.urls')), 
     path('swagger/', schema_view.with_ui('swagger',  cache_timeout=60), name='swagger-ui'),
     path('redoc/', schema_view.with_ui('redoc',  cache_timeout=60), name='redoc-ui'),
+    # 提供swagger.json下载接口
+    path('swagger.json', schema_view.without_ui(cache_timeout=0), name='swagger-json'),
 ]
  
 # 开发环境静态文件服务配置 

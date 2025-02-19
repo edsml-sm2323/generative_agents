@@ -3,7 +3,7 @@
     <!-- 加载状态 -->
     <div v-if="loading" class="loading-state">
       <div class="spinner"></div>
-      <p>正在加载实验数据...</p>
+      <p>Loading experimental data...</p>
     </div>
  
     <!-- 错误状态 -->
@@ -18,7 +18,7 @@
       <img src="@/assets/empty-experiment.png"  alt="无实验" />
       <p>暂无实验项目</p>
       <button @click="openCreateForm" class="create-button">
-        + 创建第一个实验 
+        + Create the first experiment
       </button>
     </div>
  
@@ -85,7 +85,7 @@
       v-show="!loading && !error"
     >
       <span class="plus-icon">+</span>
-      创建新实验 
+      Create a new experiment 
     </button>
   </div>
 </template>

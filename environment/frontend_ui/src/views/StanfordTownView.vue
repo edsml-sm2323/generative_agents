@@ -4,13 +4,13 @@
     <section class="project-intro">
       <h1 class="title">
         <span class="title-icon">🌐</span>
-        斯坦福小镇模拟平台 
+        AI Town
         <span class="beta-tag">Beta</span>
       </h1>
       <div class="intro-content">
         <feature-card class="text-section">
           <template #icon>📌</template>
-          <h3>平台特性</h3>
+          <h3>Platform characteristics</h3>
           <ul class="feature-list">
             <li v-for="(feature, index) in features" :key="index">
               <span class="feature-icon">{{ feature.icon  }}</span>
@@ -47,7 +47,7 @@
           <svg xmlns="http://www.w3.org/2000/svg"  width="16" height="16" viewBox="0 0 24 24">
             <path fill="currentColor" d="M18 12.998h-5v5a1 1 0 0 1-2 0v-5H6a1 1 0 0 1 0-2h5v-5a1 1 0 0 1 2 0v5h5a1 1 0 0 1 0 2z"/>
           </svg>
-          创建新实验
+          Create a new experiment
         </button>
       </div>
 
@@ -107,10 +107,13 @@ const playerKey = ref(0)
 
 // 平台特性列表 
 const features = ref([
-  { icon: '🤖', text: '支持25+智能体并行交互' },
-  { icon: '🌍', text: '三维可视化环境构建' },
-  { icon: '📈', text: '实时数据监控与预测分析' },
-  { icon: '🔍', text: '实验过程追溯与回放' }
+  { icon: '🤖', text: 'Supports 25+ agents for parallel interaction' },
+  { icon: '🌍', text: '3D visualization environment construction' },
+  { icon: '📈', text: 'Real-time data monitoring and predictive analytics' },
+  { icon: '🔍', text: 'Experiment process tracing and replay' },
+  { icon: '⚙️', text: 'Customizable agent behaviors and parameters' },
+  { icon: '💡', text: 'User-friendly interface for easy navigation' },
+  { icon: '📊', text: 'Comprehensive reporting tools for insights and analysis' }
 ])
 
 // 计算属性 

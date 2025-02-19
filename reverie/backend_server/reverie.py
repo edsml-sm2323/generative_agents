@@ -55,122 +55,238 @@ def trace_calls_and_lines(frame, event, arg):
 class ReverieServer: 
   def __init__(self, 
                fork_sim_code,
-               sim_code):
-    
-    print ("(reverie): Temp storage: ", fs_temp_storage)
-        
-    # FORKING FROM A PRIOR SIMULATION:
-    # <fork_sim_code> indicates the simulation we are forking from. 
-    # Interestingly, all simulations must be forked from some initial 
-    # simulation, where the first simulation is "hand-crafted".
-    self.fork_sim_code = fork_sim_code
-    fork_folder = f"{fs_storage}/{self.fork_sim_code}"
+               sim_code,
+               isCreate = False):
+    # 通过默认参数重载初始化函数
+    if isCreate:
+        print("(reverie): 临时存储: ", fs_temp_storage)
 
-    # <sim_code> indicates our current simulation. The first step here is to 
-    # copy everything that's in <fork_sim_code>, but edit its 
-    # reverie/meta/json's fork variable. 
-    self.sim_code = sim_code
-    sim_folder = f"{fs_storage}/{self.sim_code}"
-    copyanything(fork_folder, sim_folder)
+        # 从先前的模拟中分叉:
+        # <fork_sim_code> 表示我们从哪个模拟分叉。
+        # 有趣的是，所有模拟都必须从某个初始模拟分叉，
+        # 第一个模拟是“手工制作”的。
+        self.fork_sim_code = fork_sim_code
+        fork_folder = f"{fs_storage}/{self.fork_sim_code}"
 
-    with open(f"{sim_folder}/reverie/meta.json") as json_file:  
-      reverie_meta = json.load(json_file)
+        # <sim_code> 表示我们当前的模拟。
+        # 第一件事是复制<fork_sim_code>中的所有内容，但修改其
+        # reverie/meta/json中的fork变量。
+        self.sim_code = sim_code
+        sim_folder = f"{fs_storage}/{self.sim_code}"
 
-    with open(f"{sim_folder}/reverie/meta.json", "w") as outfile: 
-      reverie_meta["fork_sim_code"] = fork_sim_code
-      outfile.write(json.dumps(reverie_meta, indent=2))
+        with open(f"{sim_folder}/reverie/meta.json") as json_file:  
+            reverie_meta = json.load(json_file)
 
-    # LOADING REVERIE'S GLOBAL VARIABLES
-    # The start datetime of the Reverie: 
-    # <start_datetime> is the datetime instance for the start datetime of 
-    # the Reverie instance. Once it is set, this is not really meant to 
-    # change. It takes a string date in the following example form: 
-    # "June 25, 2022"
-    # e.g., ...strptime(June 25, 2022, "%B %d, %Y")
-    self.start_time = datetime.datetime.strptime(
-                        f"{reverie_meta['start_date']}, 00:00:00",  
-                        "%B %d, %Y, %H:%M:%S")
-    # <curr_time> is the datetime instance that indicates the game's current
-    # time. This gets incremented by <sec_per_step> amount everytime the world
-    # progresses (that is, everytime curr_env_file is recieved). 
-    self.curr_time = datetime.datetime.strptime(reverie_meta['curr_time'], 
-                                                "%B %d, %Y, %H:%M:%S")
-    # <sec_per_step> denotes the number of seconds in game time that each 
-    # step moves foward. 
-    self.sec_per_step = reverie_meta['sec_per_step']
-    
-    # <maze> is the main Maze instance. Note that we pass in the maze_name
-    # (e.g., "double_studio") to instantiate Maze. 
-    # e.g., Maze("double_studio")
-    self.maze = Maze(reverie_meta['maze_name'])
-    
-    # <step> denotes the number of steps that our game has taken. A step here
-    # literally translates to the number of moves our personas made in terms
-    # of the number of tiles. 
-    self.step = reverie_meta['step']
+        with open(f"{sim_folder}/reverie/meta.json", "w") as outfile: 
+            reverie_meta["fork_sim_code"] = fork_sim_code
+            reverie_meta["running_status"] = "running"  # 添加状态记录
+            outfile.write(json.dumps(reverie_meta, indent=2))
 
-    # SETTING UP PERSONAS IN REVERIE
-    # <personas> is a dictionary that takes the persona's full name as its 
-    # keys, and the actual persona instance as its values.
-    # This dictionary is meant to keep track of all personas who are part of
-    # the Reverie instance. 
-    # e.g., ["Isabella Rodriguez"] = Persona("Isabella Rodriguezs")
-    self.personas = dict()
-    # <personas_tile> is a dictionary that contains the tile location of
-    # the personas (!-> NOT px tile, but the actual tile coordinate).
-    # The tile take the form of a set, (row, col). 
-    # e.g., ["Isabella Rodriguez"] = (58, 39)
-    self.personas_tile = dict()
-    
-    # # <persona_convo_match> is a dictionary that describes which of the two
-    # # personas are talking to each other. It takes a key of a persona's full
-    # # name, and value of another persona's full name who is talking to the 
-    # # original persona. 
-    # # e.g., dict["Isabella Rodriguez"] = ["Maria Lopez"]
-    # self.persona_convo_match = dict()
-    # # <persona_convo> contains the actual content of the conversations. It
-    # # takes as keys, a pair of persona names, and val of a string convo. 
-    # # Note that the key pairs are *ordered alphabetically*. 
-    # # e.g., dict[("Adam Abraham", "Zane Xu")] = "Adam: baba \n Zane:..."
-    # self.persona_convo = dict()
+        # 加载Reverie的全局变量
+        # Reverie的启动时间:
+        # <start_datetime> 是Reverie实例的启动日期时间。
+        # 一旦设置，它通常不会更改。
+        # 它接受一个字符串日期，例如：
+        # "June 25, 2022"
+        # 示例：...strptime(June 25, 2022, "%B %d, %Y")
+        self.start_time = datetime.datetime.strptime(
+            f"{reverie_meta['start_date']}, 00:00:00",  
+            "%B %d, %Y, %H:%M:%S")
 
-    # Loading in all personas. 
-    init_env_file = f"{sim_folder}/environment/{str(self.step)}.json"
-    init_env = json.load(open(init_env_file))
-    for persona_name in reverie_meta['persona_names']: 
-      persona_folder = f"{sim_folder}/personas/{persona_name}"
-      p_x = init_env[persona_name]["x"]
-      p_y = init_env[persona_name]["y"]
-      curr_persona = Persona(persona_name, persona_folder)
+        # <curr_time> 是表示游戏当前时间的datetime实例。
+        # 每次世界进展时（即每次接收到curr_env_file时），它会增加
+        # <sec_per_step>。
+        self.curr_time = datetime.datetime.strptime(reverie_meta['curr_time'], 
+                                                    "%B %d, %Y, %H:%M:%S")
 
-      self.personas[persona_name] = curr_persona
-      self.personas_tile[persona_name] = (p_x, p_y)
-      self.maze.tiles[p_y][p_x]["events"].add(curr_persona.scratch
-                                              .get_curr_event_and_desc())
+        # <sec_per_step> 表示游戏中每个步骤所经过的秒数。
+        self.sec_per_step = reverie_meta['sec_per_step']
 
-    # REVERIE SETTINGS PARAMETERS:  
-    # <server_sleep> denotes the amount of time that our while loop rests each
-    # cycle; this is to not kill our machine. 
-    self.server_sleep = 0.1
+        # <maze> 是主要的Maze实例。注意，我们传递迷宫名称
+        #（例如："double_studio"）来实例化Maze。
+        # 示例：Maze("double_studio")
+        self.maze = Maze(reverie_meta['maze_name'])
 
-    # SIGNALING THE FRONTEND SERVER: 
-    # curr_sim_code.json contains the current simulation code, and
-    # curr_step.json contains the current step of the simulation. These are 
-    # used to communicate the code and step information to the frontend. 
-    # Note that step file is removed as soon as the frontend opens up the 
-    # simulation. 
-    curr_sim_code = dict()
-    curr_sim_code["sim_code"] = self.sim_code
-    with open(f"{fs_temp_storage}/curr_sim_code.json", "w") as outfile: 
-      outfile.write(json.dumps(curr_sim_code, indent=2))
-    
-    curr_step = dict()
-    curr_step["step"] = self.step
-    with open(f"{fs_temp_storage}/curr_step.json", "w") as outfile: 
-      outfile.write(json.dumps(curr_step, indent=2))
+        # <step> 表示游戏已经进行的步数。这里的步数
+        # 实际上是指我们的人物移动的数量（按瓷砖数计算）。
+        self.step = reverie_meta['step']
 
-    # 创建movement文件夹
-    os.makedirs(f"{sim_folder}/movement/", exist_ok=True)  # exist_ok=True 可以防止文件夹已存在时抛出错误
+        # 在Reverie中设置角色
+        # <personas> 是一个字典，键是角色的全名，值是实际的Persona实例。
+        # 该字典用于跟踪所有属于Reverie实例的角色。
+        # 示例：["Isabella Rodriguez"] = Persona("Isabella Rodriguez")
+        self.personas = dict()
+
+        # <personas_tile> 是一个字典，包含每个角色的位置
+        # （并非像素坐标，而是实际的瓷砖坐标）。
+        # 例如：["Isabella Rodriguez"] = (58, 39)
+        self.personas_tile = dict()
+
+        # <persona_convo_match> 是一个字典，描述哪两个角色在交谈。
+        # 它的键是某个角色的全名，值是另一个正在与该角色交谈的
+        # 角色的全名。
+        # 示例：dict["Isabella Rodriguez"] = ["Maria Lopez"]
+        # self.persona_convo_match = dict()
+
+        # <persona_convo> 包含实际的对话内容。
+        # 它的键是角色名的组合，值是字符串形式的对话内容。
+        # 注意：键是按字母顺序排列的。
+        # 示例：dict[("Adam Abraham", "Zane Xu")] = "Adam: baba \n Zane:..."
+        # self.persona_convo = dict()
+
+        # 加载所有角色
+        init_env_file = f"{sim_folder}/environment/{str(self.step)}.json"
+        init_env = json.load(open(init_env_file))
+        for persona_name in reverie_meta['persona_names']: 
+            persona_folder = f"{sim_folder}/personas/{persona_name}"
+            p_x = init_env[persona_name]["x"]
+            p_y = init_env[persona_name]["y"]
+            curr_persona = Persona(persona_name, persona_folder)
+
+            self.personas[persona_name] = curr_persona
+            self.personas_tile[persona_name] = (p_x, p_y)
+            self.maze.tiles[p_y][p_x]["events"].add(curr_persona.scratch
+                                                    .get_curr_event_and_desc())
+
+        # Reverie设置参数:  
+        # <server_sleep> 表示每次循环之间休眠的时间；
+        # 这是为了避免占用过多计算资源。
+        self.server_sleep = 0.1
+
+        # 信号前端服务器: 
+        # curr_sim_code.json包含当前的模拟代码，
+        # curr_step.json包含当前模拟的步数。这些文件
+        # 用于向前端传递代码和步数信息。
+        # 一旦前端打开模拟，步数文件就会被删除。
+        curr_sim_code = dict()
+        curr_sim_code["sim_code"] = self.sim_code
+        with open(f"{fs_temp_storage}/curr_sim_code.json", "w") as outfile: 
+            outfile.write(json.dumps(curr_sim_code, indent=2))
+
+        curr_step = dict()
+        curr_step["step"] = self.step
+        with open(f"{fs_temp_storage}/curr_step.json", "w") as outfile: 
+            outfile.write(json.dumps(curr_step, indent=2))
+
+        # 创建movement文件夹
+        os.makedirs(f"{sim_folder}/movement/", exist_ok=True)  # exist_ok=True 可以防止文件夹已存在时抛出错误
+
+    else: # 下面是正常初始化
+      print ("(reverie): Temp storage: ", fs_temp_storage)
+          
+      # FORKING FROM A PRIOR SIMULATION:
+      # <fork_sim_code> indicates the simulation we are forking from. 
+      # Interestingly, all simulations must be forked from some initial 
+      # simulation, where the first simulation is "hand-crafted".
+      self.fork_sim_code = fork_sim_code
+      fork_folder = f"{fs_storage}/{self.fork_sim_code}"
+
+      # <sim_code> indicates our current simulation. The first step here is to 
+      # copy everything that's in <fork_sim_code>, but edit its 
+      # reverie/meta/json's fork variable. 
+      self.sim_code = sim_code
+      sim_folder = f"{fs_storage}/{self.sim_code}"
+      copyanything(fork_folder, sim_folder) # 模版的使用
+
+      with open(f"{sim_folder}/reverie/meta.json") as json_file:  
+        reverie_meta = json.load(json_file)
+
+      with open(f"{sim_folder}/reverie/meta.json", "w") as outfile: 
+        reverie_meta["fork_sim_code"] = fork_sim_code
+        reverie_meta["running_status"] = "running" # 添加状态记录
+        outfile.write(json.dumps(reverie_meta, indent=2))
+
+      # LOADING REVERIE'S GLOBAL VARIABLES
+      # The start datetime of the Reverie: 
+      # <start_datetime> is the datetime instance for the start datetime of 
+      # the Reverie instance. Once it is set, this is not really meant to 
+      # change. It takes a string date in the following example form: 
+      # "June 25, 2022"
+      # e.g., ...strptime(June 25, 2022, "%B %d, %Y")
+      self.start_time = datetime.datetime.strptime(
+                          f"{reverie_meta['start_date']}, 00:00:00",  
+                          "%B %d, %Y, %H:%M:%S")
+      # <curr_time> is the datetime instance that indicates the game's current
+      # time. This gets incremented by <sec_per_step> amount everytime the world
+      # progresses (that is, everytime curr_env_file is recieved). 
+      self.curr_time = datetime.datetime.strptime(reverie_meta['curr_time'], 
+                                                  "%B %d, %Y, %H:%M:%S")
+      # <sec_per_step> denotes the number of seconds in game time that each 
+      # step moves foward. 
+      self.sec_per_step = reverie_meta['sec_per_step']
+      
+      # <maze> is the main Maze instance. Note that we pass in the maze_name
+      # (e.g., "double_studio") to instantiate Maze. 
+      # e.g., Maze("double_studio")
+      self.maze = Maze(reverie_meta['maze_name'])
+      
+      # <step> denotes the number of steps that our game has taken. A step here
+      # literally translates to the number of moves our personas made in terms
+      # of the number of tiles. 
+      self.step = reverie_meta['step']
+
+      # SETTING UP PERSONAS IN REVERIE
+      # <personas> is a dictionary that takes the persona's full name as its 
+      # keys, and the actual persona instance as its values.
+      # This dictionary is meant to keep track of all personas who are part of
+      # the Reverie instance. 
+      # e.g., ["Isabella Rodriguez"] = Persona("Isabella Rodriguezs")
+      self.personas = dict()
+      # <personas_tile> is a dictionary that contains the tile location of
+      # the personas (!-> NOT px tile, but the actual tile coordinate).
+      # The tile take the form of a set, (row, col). 
+      # e.g., ["Isabella Rodriguez"] = (58, 39)
+      self.personas_tile = dict()
+      
+      # # <persona_convo_match> is a dictionary that describes which of the two
+      # # personas are talking to each other. It takes a key of a persona's full
+      # # name, and value of another persona's full name who is talking to the 
+      # # original persona. 
+      # # e.g., dict["Isabella Rodriguez"] = ["Maria Lopez"]
+      # self.persona_convo_match = dict()
+      # # <persona_convo> contains the actual content of the conversations. It
+      # # takes as keys, a pair of persona names, and val of a string convo. 
+      # # Note that the key pairs are *ordered alphabetically*. 
+      # # e.g., dict[("Adam Abraham", "Zane Xu")] = "Adam: baba \n Zane:..."
+      # self.persona_convo = dict()
+
+      # Loading in all personas. 
+      init_env_file = f"{sim_folder}/environment/{str(self.step)}.json"
+      init_env = json.load(open(init_env_file))
+      for persona_name in reverie_meta['persona_names']: 
+        persona_folder = f"{sim_folder}/personas/{persona_name}"
+        p_x = init_env[persona_name]["x"]
+        p_y = init_env[persona_name]["y"]
+        curr_persona = Persona(persona_name, persona_folder)
+
+        self.personas[persona_name] = curr_persona
+        self.personas_tile[persona_name] = (p_x, p_y)
+        self.maze.tiles[p_y][p_x]["events"].add(curr_persona.scratch
+                                                .get_curr_event_and_desc())
+
+      # REVERIE SETTINGS PARAMETERS:  
+      # <server_sleep> denotes the amount of time that our while loop rests each
+      # cycle; this is to not kill our machine. 
+      self.server_sleep = 0.1
+
+      # SIGNALING THE FRONTEND SERVER: 
+      # curr_sim_code.json contains the current simulation code, and
+      # curr_step.json contains the current step of the simulation. These are 
+      # used to communicate the code and step information to the frontend. 
+      # Note that step file is removed as soon as the frontend opens up the 
+      # simulation. 
+      curr_sim_code = dict()
+      curr_sim_code["sim_code"] = self.sim_code
+      with open(f"{fs_temp_storage}/curr_sim_code.json", "w") as outfile: 
+        outfile.write(json.dumps(curr_sim_code, indent=2))
+      
+      curr_step = dict()
+      curr_step["step"] = self.step
+      with open(f"{fs_temp_storage}/curr_step.json", "w") as outfile: 
+        outfile.write(json.dumps(curr_step, indent=2))
+
+      # 创建movement文件夹
+      os.makedirs(f"{sim_folder}/movement/", exist_ok=True)  # exist_ok=True 可以防止文件夹已存在时抛出错误
 
 
   def save(self): 
@@ -196,6 +312,7 @@ class ReverieServer:
     reverie_meta["maze_name"] = self.maze.maze_name
     reverie_meta["persona_names"] = list(self.personas.keys())
     reverie_meta["step"] = self.step
+    reverie_meta["running_status"] = "finished" # 添加状态记录
     reverie_meta_f = f"{sim_folder}/reverie/meta.json"
     with open(reverie_meta_f, "w") as outfile: 
       outfile.write(json.dumps(reverie_meta, indent=2))
