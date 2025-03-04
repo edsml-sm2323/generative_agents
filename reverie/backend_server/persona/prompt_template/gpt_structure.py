@@ -20,7 +20,7 @@ from utils import *
 # os.environ["HTTP_PROXY"] = "http://127.0.0.1:7890"
 # os.environ["HTTPS_PROXY"] = "http://127.0.0.1:7890"
 
-config_path = Path("../../openai_config.json")
+config_path = os.path.join(ROOT_DIR,"openai_config.json")
 with open(config_path, "r") as f:
     openai_config = json.load(f) 
 

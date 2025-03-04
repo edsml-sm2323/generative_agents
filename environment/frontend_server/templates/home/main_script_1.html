@@ -1,0 +1,110 @@
+{% load static %}
+
+<div id="new_scene_step" style="display:none">{{new_scene_step}}</div>
+<div id="new_scene_sim_code" style="display:none">{{new_scene_sim_code}}</div>
+<div id="new_scene_persona_name_list" style="display:none">{{new_scene_persona_name_str}}</div>
+<div id="new_scene_persona_init_pos" style="display:none">
+    {% for i in new_scene_persona_init_pos %}
+        <span>{{i.0}},{{i.1}},{{i.2}}</span>
+    {% endfor %}
+</div>
+
+<script type="text/javascript">
+
+    let newSceneStep = parseInt(document.getElementById('new_scene_step').innerHTML);
+    let newSceneSimCode = document.getElementById('new_scene_sim_code').innerHTML;
+
+    let newSceneSpans = document.getElementById('new_scene_persona_init_pos').getElementsByTagName('span');
+    let newScenePersonaNames = {};
+    for (var i = 0, l = newSceneSpans.length; i < l; i++) {
+        let x = newSceneSpans[i].innerText.split(",");
+        newScenePersonaNames[x[0]] = [parseInt(x[1]), parseInt(x[2])];
+    }
+
+    // Phaser 3.0 global settings. 
+    const newSceneConfig = {
+        type: Phaser.AUTO,
+        width: 1500,
+        height: 800,
+        parent: "new-game-container",
+        pixelArt: true,
+        physics: {
+            default: "arcade",
+            arcade: {
+                gravity: { y: 0 }
+            }
+        },
+        scene: {
+            preload: preloadNewScene,
+            create: createNewScene,
+            update: updateNewScene
+        }
+    };
+
+    const newSceneGame = new Phaser.Game(newSceneConfig);
+    let newSceneCursors;
+    let newScenePlayer;
+    let newSceneCamera;
+
+    var newSceneSpawnTileLoc = {};
+    for (var key in newScenePersonaNames) {
+        newSceneSpawnTileLoc[key] = newScenePersonaNames[key];
+    }
+    console.log(newSceneSpawnTileLoc);
+
+    function preloadNewScene() {
+        this.load.image("new_scene_blocks", "{% static 'assets/new_scene/visuals/map_assets/blocks.png' %}");
+        this.load.image("new_scene_walls", "{% static 'assets/test_map/Classroom.png' %}");
+        this.load.tilemapTiledJSON("new_scene_map", "{% static 'assets/test_map/Classroom.json' %}");
+    }
+
+    function createNewScene() {
+        const map = this.make.tilemap({ key: "new_scene_map" });
+        const blocks = map.addTilesetImage("blocks", "new_scene_blocks");
+        const walls = map.addTilesetImage("walls", "new_scene_walls");
+
+        const bottomLayer = map.createLayer("Bottom Layer", blocks, 0, 0);
+        const wallLayer = map.createLayer("Wall Layer", walls, 0, 0);
+        wallLayer.setCollisionByProperty({ collide: true });
+
+        newScenePlayer = this.physics.add.sprite(100, 100, "new_scene_blocks").setOrigin(0.5, 0.5);
+        newSceneCamera = this.cameras.main;
+        newSceneCamera.startFollow(newScenePlayer);
+        newSceneCamera.setBounds(0, 0, map.widthInPixels, map.heightInPixels);
+        newSceneCursors = this.input.keyboard.createCursorKeys();
+
+        // Initialize personas
+        for (let personaName in newSceneSpawnTileLoc) {
+            let startPos = newSceneSpawnTileLoc[personaName];
+            this.physics.add.sprite(startPos[0], startPos[1], "new_scene_blocks");
+        }
+    }
+
+    function updateNewScene() {
+        newScenePlayer.body.setVelocity(0);
+        if (newSceneCursors.left.isDown) {
+            newScenePlayer.body.setVelocityX(-200);
+        }
+        if (newSceneCursors.right.isDown) {
+            newScenePlayer.body.setVelocityX(200);
+        }
+        if (newSceneCursors.up.isDown) {
+            newScenePlayer.body.setVelocityY(-200);
+        }
+        if (newSceneCursors.down.isDown) {
+            newScenePlayer.body.setVelocityY(200);
+        }
+    }
+
+    // 自适应缩放逻辑 
+    function resizeNewSceneGame() {
+        const gameCanvas = document.querySelector('canvas'); 
+        if (gameCanvas) {
+            gameCanvas.style.width = '100%';
+            gameCanvas.style.height = 'auto';
+        }
+    }
+
+    window.addEventListener('resize', resizeNewSceneGame);
+    resizeNewSceneGame();
+</script>

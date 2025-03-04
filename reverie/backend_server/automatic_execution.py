@@ -163,7 +163,73 @@ def save_checkpoint(rs, idx: int, th: Process) -> Tuple[str, int, int]:
     rs.open_server(input_command="fin")
     print(f"(Auto-Exec): Checkpoint saved: {target}", flush=True)    
     return target, get_starting_step(target), idx+1
-    
+
+
+###封装一个自动化服务类用于接口调用：
+class AutomaticReverieServer:
+    def __init__(self, origin: str, target: str, steps: int, ui: bool, port: str, isCreate: bool = False):
+        self.origin = origin
+        self.target = target
+        self.steps = steps
+        self.ui = ui
+        self.port = port
+        self.checkpoint_freq = 200  # Frequency of checkpoints
+        self.log_path = "cost-logs"  # Log path for simulation prints
+        self.idx = 0
+        self.current_step = get_starting_step(origin)  # 使用外部函数
+        self.isCreate = isCreate
+
+    def get_new_checkpoint(self, step: int) -> int:
+        """Get the new checkpoint based on the current step."""
+        new_checkpoint = step + self.checkpoint_freq
+        return min(new_checkpoint, self.steps)
+
+    def run_experiment(self):
+        """Run the experiment."""
+        start_time = datetime.now()
+        print("(Auto-Exec): STARTING THE EXPERIMENT", flush=True)
+        print(f"(Auto-Exec): Origin: {self.origin}", flush=True)
+        print(f"(Auto-Exec): Target: {self.target}", flush=True)
+        print(f"(Auto-Exec): Total steps: {self.steps}", flush=True)
+        print(f"(Auto-Exec): Checkpoint Freq: {self.checkpoint_freq}", flush=True)
+
+        while self.current_step < self.steps:
+            try:
+                curr_checkpoint = self.get_new_checkpoint(self.current_step)
+                steps_to_run = curr_checkpoint - self.current_step
+                print(f"(Auto-Exec): Running experiment '{self.target}' from step '{self.current_step}' to '{curr_checkpoint}'", flush=True)
+
+                rs = reverie.ReverieServer(self.origin, self.target, self.isCreate)
+                rs.open_server(input_command=f"run {steps_to_run}")
+
+            except KeyboardInterrupt:
+                print("(Auto-Exec): KeyboardInterrupt: Stopping the experiment.", flush=True)
+                sys.exit(0)
+            except Exception as e:
+                print(e, flush=True)
+                step = e.args[1] if len(e.args) > 1 else 0
+                if step != 0:
+                    self.origin, self.current_step, self.idx = self.save_checkpoint(rs)
+                else:
+                    shutil.rmtree(f"../../environment/frontend_server/storage/{self.target}")
+                print(f"(Auto-Exec): Error at step {self.current_step}", flush=True)
+                print(f"(Auto-Exec): Exception {e.args[0]}", flush=True)
+            else:
+                self.origin, self.current_step, self.idx = self.save_checkpoint(rs)
+
+            finally:
+                time.sleep(10)  # Wait for the server to finish
+
+        print(f"(Auto-Exec): EXPERIMENT FINISHED: {self.target}")
+        print(f"(Auto-Exec): Execution time: {datetime.now() - start_time}")
+
+    def save_checkpoint(self, rs) -> Tuple[str, int, int]:
+        """Save the checkpoint and return data to start the new one."""
+        target = rs.sim_code
+        rs.open_server(input_command="fin")
+        print(f"(Auto-Exec): Checkpoint saved: {target}", flush=True)
+        return target, get_starting_step(target), self.idx + 1  # 使用外部函数
+
 
 if __name__ == '__main__':
     checkpoint_freq = 200 # 1 step = 10 sec

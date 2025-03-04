@@ -15,6 +15,12 @@ from django.conf  import settings
 
 from global_methods import *
 
+import sys
+
+# 添加 reverie 模块的父目录到 sys.path
+sys.path.append(os.path.join(settings.ROOT_DIR, 'reverie/backend_server'))
+from automatic_execution import AutomaticReverieServer
+# from reverie import ReverieServer
 
 EXPERIMENT_STORAGE_ROOT = settings.EXPERIMENT_STORAGE_ROOT
 PUBLIC_EXPERIMENT_WHITELIST = settings.PUBLIC_EXPERIMENT_WHITELIST
@@ -450,6 +456,7 @@ class ExperimentCreateView(APIView):
                     ),
                     description="人物设置，包括每个人物的详细信息"
                 ),
+                'steps': openapi.Schema(type= openapi.TYPE_INTEGER, description="实验模拟的步数"),
             },
         ),
         responses={
@@ -457,13 +464,14 @@ class ExperimentCreateView(APIView):
             400: openapi.Response(description="参数验证失败，确保所有必需字段均已提供"),
         }
     )
-    def post(self, request):
+    def post(self, request): 
         """
         创建或修改实验
         """
         # 获取参数
         sim_code = request.data.get('sim_code')
         characters = request.data.get('characters')
+        simulate_steps = request.data.get('steps')
 
         if not sim_code:
             return Response({"error": "sim_code are required."}, status=status.HTTP_400_BAD_REQUEST)
@@ -475,8 +483,8 @@ class ExperimentCreateView(APIView):
 
         # 创建环境目录
         environment_dir = os.path.join(experiment_dir, 'environment')
-        if not os.path.exists(persona_dir):
-            os.makedirs(persona_dir)
+        if not os.path.exists(environment_dir):
+            os.makedirs(environment_dir)
         # 创建初始位置
         experiment_coordinates_path = os.path.join(environment_dir, '0.json')
         coordinates_data = {
@@ -495,7 +503,15 @@ class ExperimentCreateView(APIView):
         temp_storage_path = settings.EXPERIMENT_TEMPLATES_STORAGE_ROOT
         temp_associative_memory_path = os.path.join(temp_storage_path,'associative_memory')
         temp_reverie_path = os.path.join(temp_storage_path, 'reverie')
-        copyanything(temp_reverie_path,os.path.join(experiment_dir, 'reverie'))
+        sim_reverie_path = os.path.join(experiment_dir, 'reverie')
+        MyCopyanything(temp_reverie_path,sim_reverie_path)
+
+        # 记录人物数据到meta中
+        with open(f"{sim_reverie_path}/meta.json") as json_file:  
+            reverie_meta = json.load(json_file)
+        with open(f"{sim_reverie_path}/meta.json", "w") as outfile: 
+            reverie_meta["persona_names"] = [character.get('name') for character in characters]
+            outfile.write(json.dumps(reverie_meta, indent=2))
 
         # 为每个角色创建文件夹和修改 scratch.json
         for character in characters:
@@ -655,18 +671,21 @@ class ExperimentCreateView(APIView):
                 character_items = {}
                 for area, items in areas.items():
                     # 随机选择一些物品，或者根据个性来决定，目前随机
-                    num_items = random.randint(1, 3)  # 选择1到3个物品
+                    num_items = random.randint(0, len(items))  # 选择1到3个物品
                     chosen_items = random.sample(items, num_items)
                     character_items[area] = chosen_items
                 spatial_memory_data[location] = character_items
             spatial_memory_path = os.path.join(bootstrap_memory_dir,'spatial_memory.json')
             with open(spatial_memory_path, 'w') as f:
                 json.dump(spatial_memory_data, f)
-            copyanything(temp_associative_memory_path,os.path.join(bootstrap_memory_dir,'associative_memory'))
+            MyCopyanything(temp_associative_memory_path,os.path.join(bootstrap_memory_dir,'associative_memory'))
+            
         # 执行 实验
         try:
-            rs = ReverieServer("No Fork",sim_code,isCreate= True)
-            rs.open_server()
+            auto_rs = AutomaticReverieServer("No Fork",sim_code,steps=simulate_steps,ui=False,port=8000,isCreate = True)
+            auto_rs.run_experiment()#找不到后端需要调用的文件错误
+            # rs = ReverieServer("No Fork",sim_code,isCreate= True)
+            # rs.open_server()
         except subprocess.CalledProcessError as e:
             logging.error(f"Error executing experiment: {e}")
             return Response({"error": f"Error executing experiment: {e}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
@@ -682,11 +701,34 @@ class ExperimentStartView(APIView):
     @swagger_auto_schema(
         operation_description="启动实验并执行外部脚本(通过原项目中的自动化脚本启动，暂时无法监控)",
         manual_parameters=[
-            openapi.Parameter('sim_code', openapi.IN_QUERY, description="实验代码", type=openapi.TYPE_STRING),
-            openapi.Parameter('target', openapi.IN_QUERY, description="目标实验", type=openapi.TYPE_STRING),
-            openapi.Parameter('steps', openapi.IN_QUERY, description="实验步骤数", type=openapi.TYPE_INTEGER),
-            openapi.Parameter('ui', openapi.IN_QUERY, description="是否启用UI", type=openapi.TYPE_BOOLEAN),
-            openapi.Parameter('port', openapi.IN_QUERY, description="端口号", type=openapi.TYPE_INTEGER),
+            openapi.Parameter(
+                'sim_code',
+                openapi.IN_QUERY,
+                description="实验代码: 例如：base_the_ville_isabella_maria_klaus",
+                type=openapi.TYPE_STRING,
+                required=True  # 如果该参数是必需的，请设置为 True
+            ),
+            openapi.Parameter(
+                'target',
+                openapi.IN_QUERY,
+                description="目标实验",
+                type=openapi.TYPE_STRING,
+                required=True  # 如果该参数是必需的，请设置为 True
+            ),
+            openapi.Parameter(
+                'steps',
+                openapi.IN_QUERY,  # 确保参数类型是 IN_QUERY
+                description="实验步骤数",
+                type=openapi.TYPE_INTEGER,
+                required=True  # 如果该参数是必需的，请设置为 True
+            ),
+            openapi.Parameter(
+                'ui',
+                openapi.IN_QUERY,
+                description="是否启用UI",
+                type=openapi.TYPE_BOOLEAN,
+                required=False  # 该参数是可选的设置为 False
+            ),
         ],
         responses={
             200: openapi.Response(description="实验启动成功"),
@@ -700,12 +742,19 @@ class ExperimentStartView(APIView):
         # 获取参数
         sim_code = request.GET.get('sim_code')
         target = request.GET.get('target')
-        steps = request.GET.get('steps')
+        simulate_steps = request.GET.get('steps',0)
         ui = request.GET.get('ui', False)
-        port = request.GET.get('port', 8000)  # 默认端口
-
+        # 参数验证
         if not sim_code or not target:
             return Response({"error": "sim_code and target are required."}, status=status.HTTP_400_BAD_REQUEST)
+
+        if simulate_steps is None:
+            return Response({"error": "steps is required."}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            simulate_steps = int(simulate_steps)  # 转换为整数
+        except ValueError:
+            return Response({"error": "steps must be an integer."}, status=status.HTTP_400_BAD_REQUEST)
 
         # 获取脚本路径，确保它在容器或环境中正确执行
         backend_script_path = os.path.join(settings.ROOT_DIR, "run_backend_automatic.sh")
@@ -719,15 +768,17 @@ class ExperimentStartView(APIView):
             'bash', backend_script_path,  # 使用绝对路径调用 Bash 脚本
             '--origin', sim_code, 
             '--target', target, 
-            '--steps', str(steps),
+            '--steps', str(simulate_steps),
             '--ui', str(ui).lower(),  # False 会被转换为 "false"
-            '--port', str(port)
+            '--port', '8000'
         ]
 
         # 执行 Bash 脚本
         try:
             logging.info(f"Running command: {' '.join(bash_command)}")
             subprocess.run(bash_command, check=True)
+            # auto_rs = AutomaticReverieServer(sim_code, target, steps= simulate_steps,ui=False,port=8000,isCreate = False)
+            # auto_rs.run_experiment()
         except subprocess.CalledProcessError as e:
             logging.error(f"Error executing bash script: {e}")
             return Response({"error": f"Error executing bash script: {e}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

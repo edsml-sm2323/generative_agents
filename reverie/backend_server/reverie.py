@@ -170,6 +170,7 @@ class ReverieServer:
 
         # 创建movement文件夹
         os.makedirs(f"{sim_folder}/movement/", exist_ok=True)  # exist_ok=True 可以防止文件夹已存在时抛出错误
+        print("Reverie初始化成功")
 
     else: # 下面是正常初始化
       print ("(reverie): Temp storage: ", fs_temp_storage)

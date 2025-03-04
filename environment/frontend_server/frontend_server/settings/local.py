@@ -24,7 +24,7 @@ SECRET_KEY = 'c7l%1%b=2sh$o9zqvd4i*h8*__^@-5sm-y)m(1ib2t92)43@62'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -79,6 +79,8 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'frontend_server.wsgi.application'
 
+# 允许跨域
+CORS_ORIGIN_ALLOW_ALL = True
 
 # Database'rest_framework', 
 # https://docs.djangoproject.com/en/2.2/ref/settings/#databases

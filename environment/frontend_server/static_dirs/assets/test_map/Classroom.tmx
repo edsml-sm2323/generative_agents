@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.0" orientation="orthogonal" renderorder="right-down" width="100" height="100" tilewidth="32" tileheight="32" backgroundcolor="#ddffb8">
+ <tileset firstgid="1" name="city1" tilewidth="32" tileheight="32">
+  <image source="C:/Users/l/Downloads/各类风格地图  游戏地图场景 (12)_爱给网_aigei_com.png" width="256" height="320"/>
+ </tileset>
+ <tileset firstgid="81" name="city2" tilewidth="32" tileheight="32">
+  <image source="C:/Users/l/Downloads/现代建筑2D场景素材 (33)_爱给网_aigei_com.png" width="1024" height="1024"/>
+ </tileset>
+ <layer name="块层 1" width="100" height="100">
+  <data encoding="base64" compression="zlib">
+   eJztndlqFUEQhmeOG+KOUaOgxndwiWI0gtuF2yPogwj6III+iKBXepVrt6i5io+ggssPGjiG023P0tVV1T/kg4TkzJnur89UdXVPZmVL06wQQgghxBQf26b51JY/D/KHn3DxS7EPD+OlSxtOTJrm5KT8OYfQPl5qacMG2seLhja8geu34J0T59b5Cg/fwHf6UME8PntHwTHj1xEvLMLDeXCBPghJ4iF439rnA1iNfB/6fZ/jp7xfXx9PwLnGBg2us+2k/Hmk8L9+D801n9NHER+hueYqfRTxEZpr/qCPIj5CHN9a/tzp49/8qvS50wfzK60+mF/p8sH8SpcP5le6fDC/0uWD8VzGR+paYI3x/BX65HUr6yN1LbDGeL6OPvki7CN1LZDxXMZH6lqgpXi+gLacMuojFUv1kmW4uOLch3R+NSSW3oeLB859SOdXQ2LpI7h47NyHpfzqKVw8c+7DUn71Ai5eOvdhKb/6DBdrzn1YqpdYYkg8x1eDj0mzDWxX0JaxKdG+IfF8F16/G+wBexX039iUaN+QeH4Qr58Dh8BhBf03NiXaN93Hs2q7oXqvpXhuiek+nlXbDdV7Gc/z+5hV2w3Vey2tf1hiuo9n1XZD9V5L83NL1DA/t4Sl+flpcAac/fvzooL+0+KjxPrHRbAELoHLYNnhOOjro0R+dRVcA9fBDXDT0DhIddrXR4n86ha4De6Au+DeCMdshcZBqtNYn8f2/njJr3YKjYNUpzEfsb0/XvKrA0Lvk+o05iO292fM/Epin5kVYj5ie3/GzK8k9plZwVJ+VQOW8qsa6OvDS36ljb4+SudXKfMGi/T1UXq/aMq8wSJW47nUvMGKD8ZzXT4Yz3X5KB3PvdLXB/eX6PJROr/yitX8qi9D5i37Ffuwml8NmbfMK/ZhNb/SPm9hfpWfLvshmF/lp8t+COZX+emyH4I+urOj49932Q9BH93Zl/HYWn1oXt84UqEPr+sbVn1onyfU5qNW6EMX0j64F1GXj5r3IqaMRV6v5EgZi158eLkOxvo8dv+HNh9eroMxH7H7P6yuD25mYROlzyfmI3b/h9X1Qcs+Yvd/SK0P5v7fuZZ8xJBaH6SPNKTWB+lDV75LH/RBH/RBH/RBH/Z95H5WhBcfUvWS3M+K8OJDql6S+1kRXnxI1UtyPyvCiw+peknuZ0V48SFVL8n9rAgvPqTYeFZE6fOQ4jdHBf2k
+  </data>
+ </layer>
+ <layer name="块层 2" width="100" height="100" visible="0">
+  <data encoding="base64" compression="zlib">
+   eJztwTEBAAAAwqD1T+1lC6AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIAbnEAAAQ==
+  </data>
+ </layer>
+ <objectgroup name="对象层 1" visible="0">
+  <object x="448" y="448" width="1824" height="32"/>
+  <object x="448" y="448" width="32" height="2304"/>
+  <object x="1376" y="1472" width="160" height="128"/>
+  <object x="1344" y="1024" width="64" height="64"/>
+  <object x="288" y="1312" width="64" height="128"/>
+  <object x="256" y="1312" width="96" height="128"/>
+  <object x="448" y="2752" width="32" height="448"/>
+  <object x="2016" y="2656" width="32" height="512"/>
+  <object x="2272" y="448" width="928" height="32"/>
+  <object x="672" y="1856">
+   <polyline points="0,0 352,160 640,0 800,288 1088,224 1152,416 1376,448 1824,672"/>
+  </object>
+ </objectgroup>
+</map>

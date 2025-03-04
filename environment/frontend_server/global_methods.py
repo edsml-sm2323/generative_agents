@@ -224,6 +224,28 @@ def copyanything(src, dst):
       shutil.copy(src, dst)
     else: raise
 
+def MyCopyanything(src, dst):
+  """
+  复制源文件夹中的所有内容到目标文件夹。
+  ARGS:
+      src: 源文件夹的地址  
+      dst: 目标文件夹的地址  
+  RETURNS: 
+      None
+  """
+  try:
+      shutil.copytree(src, dst)
+  except FileExistsError:
+      # 目标目录已存在时，选择删除或更新
+      print(f"目标目录已存在，正在删除: {dst}")
+      shutil.rmtree(dst)  # 删除已存在的目录
+      shutil.copytree(src, dst)  # 然后重新复制
+  except OSError as exc:  # 处理其他操作系统错误
+      if exc.errno in (errno.ENOTDIR, errno.EINVAL):
+          shutil.copy(src, dst)  # 如果是文件而非目录，进行单个文件复制
+      else:
+          raise  # 重新抛出其他异常
+
 
 if __name__ == '__main__':
   pass

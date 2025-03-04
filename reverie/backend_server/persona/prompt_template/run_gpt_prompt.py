@@ -9,6 +9,7 @@ import re
 import datetime
 import sys
 import ast
+import os
 
 sys.path.append('../../')
 
@@ -16,9 +17,12 @@ from global_methods import *
 from persona.prompt_template.gpt_structure import *
 from persona.prompt_template.print_prompt import *
 
+# 引入基本路径
+from utils import *
+
 # 添加配置文件
 # config_path = Path("../../llm_config.json")
-config_path = Path("../../openai_config.json")
+config_path = os.path.join(ROOT_DIR,"openai_config.json")
 with open(config_path, "r") as f:
     llm_config = json.load(f) 
 
@@ -75,7 +79,7 @@ def run_gpt_prompt_wake_up_hour(persona, test_input=None, verbose=False):
   gpt_param = {"engine": llm_config["model"], "max_tokens": 5, 
              "temperature": 0.8, "top_p": 1, "stream": False,
              "frequency_penalty": 0, "presence_penalty": 0, "stop": ["\n"]}
-  prompt_template = "persona/prompt_template/v2/wake_up_hour_v1.txt"
+  prompt_template = os.path.join(BASE_PROMPT_PATH,"persona/prompt_template/v2/wake_up_hour_v1.txt")
   prompt_input = create_prompt_input(persona, test_input)
   prompt = generate_prompt(prompt_input, prompt_template)
   fail_safe = get_fail_safe()
@@ -147,7 +151,7 @@ def run_gpt_prompt_daily_plan(persona,
   gpt_param = {"engine": llm_config["model"], "max_tokens": 500, 
                "temperature": 1, "top_p": 1, "stream": False,
                "frequency_penalty": 0, "presence_penalty": 0, "stop": None}
-  prompt_template = "persona/prompt_template/v2/daily_planning_v6.txt"
+  prompt_template = os.path.join(BASE_PROMPT_PATH,"persona/prompt_template/v2/daily_planning_v6.txt")
   prompt_input = create_prompt_input(persona, wake_up_hour, test_input)
   prompt = generate_prompt(prompt_input, prompt_template)
   fail_safe = get_fail_safe()
@@ -253,7 +257,7 @@ def run_gpt_prompt_generate_hourly_schedule(persona,
   # gpt_param = {"engine": llm_config["model"], "max_tokens": 15, 
   #              "temperature": 0, "top_p": 1, "stream": False,
   #              "frequency_penalty": 0, "presence_penalty": 0, "stop": None}
-  # prompt_template = "persona/prompt_template/v3_ChatGPT/generate_hourly_schedule_v2.txt" ########
+  # prompt_template = os.path.join(BASE_PROMPT_PATH,"persona/prompt_template/v3_ChatGPT/generate_hourly_schedule_v2.txt" ########
   # prompt_input = create_prompt_input(persona, 
   #                                    curr_hour_str, 
   #                                    p_f_ds_hourly_org,
@@ -274,7 +278,7 @@ def run_gpt_prompt_generate_hourly_schedule(persona,
   gpt_param = {"engine": llm_config["model"], "max_tokens": 50, 
                "temperature": 0.5, "top_p": 1, "stream": False,
                "frequency_penalty": 0, "presence_penalty": 0, "stop": ["\n"]}
-  prompt_template = "persona/prompt_template/v2/generate_hourly_schedule_v2.txt"
+  prompt_template = os.path.join(BASE_PROMPT_PATH,"persona/prompt_template/v2/generate_hourly_schedule_v2.txt")
   prompt_input = create_prompt_input(persona, 
                                      curr_hour_str, 
                                      p_f_ds_hourly_org,
@@ -528,7 +532,7 @@ def run_gpt_prompt_task_decomp(persona,
   gpt_param = {"engine": llm_config["model"], "max_tokens": 1000, 
              "temperature": 0, "top_p": 1, "stream": False,
              "frequency_penalty": 0, "presence_penalty": 0, "stop": None}
-  prompt_template = "persona/prompt_template/v2/task_decomp_v3.txt"
+  prompt_template = os.path.join(BASE_PROMPT_PATH,"persona/prompt_template/v2/task_decomp_v3.txt")
   prompt_input = create_prompt_input(persona, task, duration)
   prompt = generate_prompt(prompt_input, prompt_template)
   fail_safe = get_fail_safe()
@@ -689,7 +693,7 @@ def run_gpt_prompt_action_sector(action_description,
   # gpt_param = {"engine": llm_config["model"], "max_tokens": 15, 
   #              "temperature": 0, "top_p": 1, "stream": False,
   #              "frequency_penalty": 0, "presence_penalty": 0, "stop": None}
-  # prompt_template = "persona/prompt_template/v3_ChatGPT/action_location_sector_v2.txt" ########
+  # prompt_template = os.path.join(BASE_PROMPT_PATH,"persona/prompt_template/v3_ChatGPT/action_location_sector_v2.txt" ########
   # prompt_input = create_prompt_input(action_description, persona, maze)  ########
   # prompt = generate_prompt(prompt_input, prompt_template)
   # example_output = "Johnson Park" ########
@@ -708,7 +712,7 @@ def run_gpt_prompt_action_sector(action_description,
   gpt_param = {"engine": llm_config["model"], "max_tokens": 15, 
                "temperature": 0, "top_p": 1, "stream": False,
                "frequency_penalty": 0, "presence_penalty": 0, "stop": None}
-  prompt_template = "persona/prompt_template/v1/action_location_sector_v1.txt"
+  prompt_template = os.path.join(BASE_PROMPT_PATH,"persona/prompt_template/v1/action_location_sector_v1.txt")
   prompt_input = create_prompt_input(action_description, persona, maze)
   prompt = generate_prompt(prompt_input, prompt_template)
 
@@ -805,7 +809,7 @@ def run_gpt_prompt_action_arena(action_description,
   gpt_param = {"engine": llm_config["model"], "max_tokens": 15, 
                "temperature": 0, "top_p": 1, "stream": False,
                "frequency_penalty": 0, "presence_penalty": 0, "stop": None}
-  prompt_template = "persona/prompt_template/v1/action_location_object_vMar11.txt"
+  prompt_template = os.path.join(BASE_PROMPT_PATH,"persona/prompt_template/v1/action_location_object_vMar11.txt")
   prompt_input = create_prompt_input(action_description, persona, maze, act_world, act_sector)
   prompt = generate_prompt(prompt_input, prompt_template)
 
@@ -861,7 +865,7 @@ def run_gpt_prompt_action_game_object(action_description,
   gpt_param = {"engine": llm_config["model"], "max_tokens": 15, 
                "temperature": 0, "top_p": 1, "stream": False,
                "frequency_penalty": 0, "presence_penalty": 0, "stop": None}
-  prompt_template = "persona/prompt_template/v1/action_object_v2.txt"
+  prompt_template = os.path.join(BASE_PROMPT_PATH,"persona/prompt_template/v1/action_object_v2.txt")
   prompt_input = create_prompt_input(action_description, 
                                      persona, 
                                      temp_address, 
@@ -931,7 +935,7 @@ def run_gpt_prompt_pronunciatio(action_description, persona, verbose=False):
   gpt_param = {"engine": llm_config["model"], "max_tokens": 15, 
                "temperature": 0, "top_p": 1, "stream": False,
                "frequency_penalty": 0, "presence_penalty": 0, "stop": None}
-  prompt_template = "persona/prompt_template/v3_ChatGPT/generate_pronunciatio_v1.txt" ########
+  prompt_template = os.path.join(BASE_PROMPT_PATH,"persona/prompt_template/v3_ChatGPT/generate_pronunciatio_v1.txt") ########
   prompt_input = create_prompt_input(action_description)  ########
   prompt = generate_prompt(prompt_input, prompt_template)
   example_output = "🛁🧖‍♀️" ########
@@ -950,7 +954,7 @@ def run_gpt_prompt_pronunciatio(action_description, persona, verbose=False):
   # gpt_param = {"engine": llm_config["model"], "max_tokens": 15, 
   #              "temperature": 0, "top_p": 1, "stream": False,
   #              "frequency_penalty": 0, "presence_penalty": 0, "stop": ["\n"]}
-  # prompt_template = "persona/prompt_template/v2/generate_pronunciatio_v1.txt"
+  # prompt_template = os.path.join(BASE_PROMPT_PATH,"persona/prompt_template/v2/generate_pronunciatio_v1.txt"
   # prompt_input = create_prompt_input(action_description)
 
   # prompt = generate_prompt(prompt_input, prompt_template)
@@ -1021,7 +1025,7 @@ def run_gpt_prompt_event_triple(action_description, persona, verbose=False):
   # gpt_param = {"engine": llm_config["model"], "max_tokens": 15, 
   #              "temperature": 0, "top_p": 1, "stream": False,
   #              "frequency_penalty": 0, "presence_penalty": 0, "stop": None}
-  # prompt_template = "persona/prompt_template/v3_ChatGPT/generate_event_triple_v1.txt" ########
+  # prompt_template = os.path.join(BASE_PROMPT_PATH,"persona/prompt_template/v3_ChatGPT/generate_event_triple_v1.txt" ########
   # prompt_input = create_prompt_input(action_description, persona)  ########
   # prompt = generate_prompt(prompt_input, prompt_template)
   # example_output = "(Jane Doe, cooking, breakfast)" ########
@@ -1039,7 +1043,7 @@ def run_gpt_prompt_event_triple(action_description, persona, verbose=False):
   gpt_param = {"engine": llm_config["model"], "max_tokens": 30, 
                "temperature": 0, "top_p": 1, "stream": False,
                "frequency_penalty": 0, "presence_penalty": 0, "stop": ["\n"]}
-  prompt_template = "persona/prompt_template/v2/generate_event_triple_v1.txt"
+  prompt_template = os.path.join(BASE_PROMPT_PATH,"persona/prompt_template/v2/generate_event_triple_v1.txt")
   prompt_input = create_prompt_input(action_description, persona)
   prompt = generate_prompt(prompt_input, prompt_template)
   fail_safe = get_fail_safe(persona) ########
@@ -1107,7 +1111,7 @@ def run_gpt_prompt_act_obj_desc(act_game_object, act_desp, persona, verbose=Fals
   gpt_param = {"engine": llm_config["model"], "max_tokens": 15, 
                "temperature": 0, "top_p": 1, "stream": False,
                "frequency_penalty": 0, "presence_penalty": 0, "stop": None}
-  prompt_template = "persona/prompt_template/v3_ChatGPT/generate_obj_event_v1.txt" ########
+  prompt_template = os.path.join(BASE_PROMPT_PATH,"persona/prompt_template/v3_ChatGPT/generate_obj_event_v1.txt") ########
   prompt_input = create_prompt_input(act_game_object, act_desp, persona)  ########
   prompt = generate_prompt(prompt_input, prompt_template)
   example_output = "being fixed" ########
@@ -1124,7 +1128,7 @@ def run_gpt_prompt_act_obj_desc(act_game_object, act_desp, persona, verbose=Fals
   # gpt_param = {"engine": llm_config["model"], "max_tokens": 30, 
   #              "temperature": 0, "top_p": 1, "stream": False,
   #              "frequency_penalty": 0, "presence_penalty": 0, "stop": ["\n"]}
-  # prompt_template = "persona/prompt_template/v2/generate_obj_event_v1.txt"
+  # prompt_template = os.path.join(BASE_PROMPT_PATH,"persona/prompt_template/v2/generate_obj_event_v1.txt"
   # prompt_input = create_prompt_input(act_game_object, act_desp, persona)
   # prompt = generate_prompt(prompt_input, prompt_template)
   # fail_safe = get_fail_safe(act_game_object)
@@ -1172,7 +1176,7 @@ def run_gpt_prompt_act_obj_event_triple(act_game_object, act_obj_desc, persona, 
   gpt_param = {"engine": llm_config["model"], "max_tokens": 30, 
                "temperature": 0, "top_p": 1, "stream": False,
                "frequency_penalty": 0, "presence_penalty": 0, "stop": ["\n"]}
-  prompt_template = "persona/prompt_template/v2/generate_event_triple_v1.txt"
+  prompt_template = os.path.join(BASE_PROMPT_PATH,"persona/prompt_template/v2/generate_event_triple_v1.txt")
   prompt_input = create_prompt_input(act_game_object, act_obj_desc)
   prompt = generate_prompt(prompt_input, prompt_template)
   fail_safe = get_fail_safe(act_game_object)
@@ -1312,7 +1316,7 @@ def run_gpt_prompt_new_decomp_schedule(persona,
   gpt_param = {"engine": llm_config["model"], "max_tokens": 1000, 
                "temperature": 0, "top_p": 1, "stream": False,
                "frequency_penalty": 0, "presence_penalty": 0, "stop": None}
-  prompt_template = "persona/prompt_template/v2/new_decomp_schedule_v1.txt"
+  prompt_template = os.path.join(BASE_PROMPT_PATH,"persona/prompt_template/v2/new_decomp_schedule_v1.txt")
   prompt_input = create_prompt_input(persona, 
                                      main_act_dur, 
                                      truncated_act_dur, 
@@ -1426,7 +1430,7 @@ def run_gpt_prompt_decide_to_talk(persona, target_persona, retrieved,test_input=
   gpt_param = {"engine": llm_config["model"], "max_tokens": 20, 
                "temperature": 0, "top_p": 1, "stream": False,
                "frequency_penalty": 0, "presence_penalty": 0, "stop": None}
-  prompt_template = "persona/prompt_template/v2/decide_to_talk_v2.txt"
+  prompt_template = os.path.join(BASE_PROMPT_PATH,"persona/prompt_template/v2/decide_to_talk_v2.txt")
   prompt_input = create_prompt_input(persona, target_persona, retrieved,
                                      test_input)
   prompt = generate_prompt(prompt_input, prompt_template)
@@ -1524,7 +1528,7 @@ def run_gpt_prompt_decide_to_react(persona, target_persona, retrieved,test_input
   gpt_param = {"engine": llm_config["model"], "max_tokens": 20, 
                "temperature": 0, "top_p": 1, "stream": False,
                "frequency_penalty": 0, "presence_penalty": 0, "stop": None}
-  prompt_template = "persona/prompt_template/v2/decide_to_react_v1.txt"
+  prompt_template = os.path.join(BASE_PROMPT_PATH,"persona/prompt_template/v2/decide_to_react_v1.txt")
   prompt_input = create_prompt_input(persona, target_persona, retrieved,
                                      test_input)
   prompt = generate_prompt(prompt_input, prompt_template)
@@ -1538,22 +1542,6 @@ def run_gpt_prompt_decide_to_react(persona, target_persona, retrieved,test_input
                       prompt_input, prompt, output)
   
   return output, [output, prompt, gpt_param, prompt_input, fail_safe]
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 def run_gpt_prompt_create_conversation(persona, target_persona, curr_loc,
                                        test_input=None, verbose=False): 
@@ -1667,7 +1655,7 @@ def run_gpt_prompt_create_conversation(persona, target_persona, curr_loc,
   gpt_param = {"engine": llm_config["model"], "max_tokens": 1000, 
                "temperature": 0.7, "top_p": 1, "stream": False,
                "frequency_penalty": 0, "presence_penalty": 0, "stop": None}
-  prompt_template = "persona/prompt_template/v2/create_conversation_v2.txt"
+  prompt_template = os.path.join(BASE_PROMPT_PATH,"persona/prompt_template/v2/create_conversation_v2.txt")
   prompt_input = create_prompt_input(persona, target_persona, curr_loc, 
                                      test_input)
   prompt = generate_prompt(prompt_input, prompt_template)
@@ -1732,7 +1720,7 @@ def run_gpt_prompt_summarize_conversation(persona, conversation, test_input=None
   gpt_param = {"engine": llm_config["model"], "max_tokens": 15, 
                "temperature": 0, "top_p": 1, "stream": False,
                "frequency_penalty": 0, "presence_penalty": 0, "stop": None}
-  prompt_template = "persona/prompt_template/v3_ChatGPT/summarize_conversation_v1.txt" ########
+  prompt_template = os.path.join(BASE_PROMPT_PATH,"persona/prompt_template/v3_ChatGPT/summarize_conversation_v1.txt") ########
   prompt_input = create_prompt_input(conversation, test_input)  ########
   prompt = generate_prompt(prompt_input, prompt_template)
   example_output = "conversing about what to eat for lunch" ########
@@ -1748,7 +1736,7 @@ def run_gpt_prompt_summarize_conversation(persona, conversation, test_input=None
   # gpt_param = {"engine": llm_config["model"], "max_tokens": 50, 
   #              "temperature": 0, "top_p": 1, "stream": False,
   #              "frequency_penalty": 0, "presence_penalty": 0, "stop": None}
-  # prompt_template = "persona/prompt_template/v2/summarize_conversation_v1.txt"
+  # prompt_template = os.path.join(BASE_PROMPT_PATH,"persona/prompt_template/v2/summarize_conversation_v1.txt"
   # prompt_input = create_prompt_input(conversation, test_input)
   # prompt = generate_prompt(prompt_input, prompt_template)
 
@@ -1802,7 +1790,7 @@ def run_gpt_prompt_extract_keywords(persona, description, test_input=None, verbo
   gpt_param = {"engine": llm_config["model"], "max_tokens": 50, 
                "temperature": 0, "top_p": 1, "stream": False,
                "frequency_penalty": 0, "presence_penalty": 0, "stop": None}
-  prompt_template = "persona/prompt_template/v2/get_keywords_v1.txt"
+  prompt_template = os.path.join(BASE_PROMPT_PATH,"persona/prompt_template/v2/get_keywords_v1.txt")
   prompt_input = create_prompt_input(description, test_input)
   prompt = generate_prompt(prompt_input, prompt_template)
 
@@ -1847,7 +1835,7 @@ def run_gpt_prompt_keyword_to_thoughts(persona, keyword, concept_summary, test_i
   gpt_param = {"engine": llm_config["model"], "max_tokens": 40, 
                "temperature": 0.7, "top_p": 1, "stream": False,
                "frequency_penalty": 0, "presence_penalty": 0, "stop": None}
-  prompt_template = "persona/prompt_template/v2/keyword_to_thoughts_v1.txt"
+  prompt_template = os.path.join(BASE_PROMPT_PATH,"persona/prompt_template/v2/keyword_to_thoughts_v1.txt")
   prompt_input = create_prompt_input(persona, keyword, concept_summary)
   prompt = generate_prompt(prompt_input, prompt_template)
 
@@ -1902,7 +1890,7 @@ def run_gpt_prompt_convo_to_thoughts(persona,
   gpt_param = {"engine": llm_config["model"], "max_tokens": 40, 
                "temperature": 0.7, "top_p": 1, "stream": False,
                "frequency_penalty": 0, "presence_penalty": 0, "stop": None}
-  prompt_template = "persona/prompt_template/v2/convo_to_thoughts_v1.txt"
+  prompt_template = os.path.join(BASE_PROMPT_PATH,"persona/prompt_template/v2/convo_to_thoughts_v1.txt")
   prompt_input = create_prompt_input(init_persona_name,  
                                     target_persona_name,
                                     convo_str,
@@ -1985,7 +1973,7 @@ def run_gpt_prompt_event_poignancy(persona, event_description, test_input=None, 
   gpt_param = {"engine": llm_config["model"], "max_tokens": 15, 
                "temperature": 0, "top_p": 1, "stream": False,
                "frequency_penalty": 0, "presence_penalty": 0, "stop": None}
-  prompt_template = "persona/prompt_template/v3_ChatGPT/poignancy_event_v1.txt" ########
+  prompt_template = os.path.join(BASE_PROMPT_PATH,"persona/prompt_template/v3_ChatGPT/poignancy_event_v1.txt") ########
   prompt_input = create_prompt_input(persona, event_description)  ########
   prompt = generate_prompt(prompt_input, prompt_template)
   example_output = "5" ########
@@ -2003,7 +1991,7 @@ def run_gpt_prompt_event_poignancy(persona, event_description, test_input=None, 
   # gpt_param = {"engine": llm_config["model"], "max_tokens": 3, 
   #              "temperature": 0, "top_p": 1, "stream": False,
   #              "frequency_penalty": 0, "presence_penalty": 0, "stop": None}
-  # prompt_template = "persona/prompt_template/v2/poignancy_event_v1.txt"
+  # prompt_template = os.path.join(BASE_PROMPT_PATH,"persona/prompt_template/v2/poignancy_event_v1.txt"
   # prompt_input = create_prompt_input(persona, event_description)
   # prompt = generate_prompt(prompt_input, prompt_template)
 
@@ -2056,7 +2044,7 @@ def run_gpt_prompt_thought_poignancy(persona, event_description, test_input=None
   gpt_param = {"engine": llm_config["model"], "max_tokens": 15, 
                "temperature": 0, "top_p": 1, "stream": False,
                "frequency_penalty": 0, "presence_penalty": 0, "stop": None}
-  prompt_template = "persona/prompt_template/v3_ChatGPT/poignancy_thought_v1.txt" ########
+  prompt_template = os.path.join(BASE_PROMPT_PATH,"persona/prompt_template/v3_ChatGPT/poignancy_thought_v1.txt") ########
   prompt_input = create_prompt_input(persona, event_description)  ########
   prompt = generate_prompt(prompt_input, prompt_template)
   example_output = "5" ########
@@ -2073,7 +2061,7 @@ def run_gpt_prompt_thought_poignancy(persona, event_description, test_input=None
   # gpt_param = {"engine": llm_config["model"], "max_tokens": 3, 
   #              "temperature": 0, "top_p": 1, "stream": False,
   #              "frequency_penalty": 0, "presence_penalty": 0, "stop": None}
-  # prompt_template = "persona/prompt_template/v2/poignancy_thought_v1.txt"
+  # prompt_template = os.path.join(BASE_PROMPT_PATH,"persona/prompt_template/v2/poignancy_thought_v1.txt"
   # prompt_input = create_prompt_input(persona, event_description)
   # prompt = generate_prompt(prompt_input, prompt_template)
 
@@ -2128,7 +2116,7 @@ def run_gpt_prompt_chat_poignancy(persona, event_description, test_input=None, v
   gpt_param = {"engine": llm_config["model"], "max_tokens": 15, 
                "temperature": 0, "top_p": 1, "stream": False,
                "frequency_penalty": 0, "presence_penalty": 0, "stop": None}
-  prompt_template = "persona/prompt_template/v3_ChatGPT/poignancy_chat_v1.txt" ########
+  prompt_template = os.path.join(BASE_PROMPT_PATH,"persona/prompt_template/v3_ChatGPT/poignancy_chat_v1.txt") ########
   prompt_input = create_prompt_input(persona, event_description)  ########
   prompt = generate_prompt(prompt_input, prompt_template)
   example_output = "5" ########
@@ -2146,7 +2134,7 @@ def run_gpt_prompt_chat_poignancy(persona, event_description, test_input=None, v
   # gpt_param = {"engine": llm_config["model"], "max_tokens": 3, 
   #              "temperature": 0, "top_p": 1, "stream": False,
   #              "frequency_penalty": 0, "presence_penalty": 0, "stop": None}
-  # prompt_template = "persona/prompt_template/v2/poignancy_chat_v1.txt"
+  # prompt_template = os.path.join(BASE_PROMPT_PATH,"persona/prompt_template/v2/poignancy_chat_v1.txt"
   # prompt_input = create_prompt_input(persona, event_description)
   # prompt = generate_prompt(prompt_input, prompt_template)
 
@@ -2204,7 +2192,7 @@ def run_gpt_prompt_focal_pt(persona, statements, n, test_input=None, verbose=Fal
   gpt_param = {"engine": llm_config["model"], "max_tokens": 15, 
                "temperature": 0, "top_p": 1, "stream": False,
                "frequency_penalty": 0, "presence_penalty": 0, "stop": None}
-  prompt_template = "persona/prompt_template/v3_ChatGPT/generate_focal_pt_v1.txt" ########
+  prompt_template = os.path.join(BASE_PROMPT_PATH,"persona/prompt_template/v3_ChatGPT/generate_focal_pt_v1.txt") ########
   prompt_input = create_prompt_input(persona, statements, n)  ########
   prompt = generate_prompt(prompt_input, prompt_template)
   example_output = '["What should Jane do for lunch", "Does Jane like strawberry", "Who is Jane"]' ########
@@ -2224,7 +2212,7 @@ def run_gpt_prompt_focal_pt(persona, statements, n, test_input=None, verbose=Fal
   gpt_param = {"engine": llm_config["model"], "max_tokens": 150, 
                "temperature": 0, "top_p": 1, "stream": False,
                "frequency_penalty": 0, "presence_penalty": 0, "stop": None}
-  prompt_template = "persona/prompt_template/v2/generate_focal_pt_v1.txt"
+  prompt_template = os.path.join(BASE_PROMPT_PATH,"persona/prompt_template/v2/generate_focal_pt_v1.txt")
   prompt_input = create_prompt_input(persona, statements, n)
   prompt = generate_prompt(prompt_input, prompt_template)
 
@@ -2275,7 +2263,7 @@ def run_gpt_prompt_insight_and_guidance(persona, statements, n, test_input=None,
   gpt_param = {"engine": llm_config["model"], "max_tokens": 150, 
                "temperature": 0.5, "top_p": 1, "stream": False,
                "frequency_penalty": 0, "presence_penalty": 0, "stop": None}
-  prompt_template = "persona/prompt_template/v2/insight_and_evidence_v1.txt"
+  prompt_template = os.path.join(BASE_PROMPT_PATH,"persona/prompt_template/v2/insight_and_evidence_v1.txt")
   prompt_input = create_prompt_input(persona, statements, n)
   prompt = generate_prompt(prompt_input, prompt_template)
 
@@ -2331,7 +2319,7 @@ def run_gpt_prompt_agent_chat_summarize_ideas(persona, target_persona, statement
   gpt_param = {"engine": llm_config["model"], "max_tokens": 15, 
                "temperature": 0, "top_p": 1, "stream": False,
                "frequency_penalty": 0, "presence_penalty": 0, "stop": None}
-  prompt_template = "persona/prompt_template/v3_ChatGPT/summarize_chat_ideas_v1.txt" ########
+  prompt_template = os.path.join(BASE_PROMPT_PATH,"persona/prompt_template/v3_ChatGPT/summarize_chat_ideas_v1.txt") ########
   prompt_input = create_prompt_input(persona, target_persona, statements, curr_context)  ########
   prompt = generate_prompt(prompt_input, prompt_template)
   example_output = 'Jane Doe is working on a project' ########
@@ -2348,7 +2336,7 @@ def run_gpt_prompt_agent_chat_summarize_ideas(persona, target_persona, statement
   # gpt_param = {"engine": llm_config["model"], "max_tokens": 150, 
   #              "temperature": 0.5, "top_p": 1, "stream": False,
   #              "frequency_penalty": 0, "presence_penalty": 0, "stop": None}
-  # prompt_template = "persona/prompt_template/v2/summarize_chat_ideas_v1.txt"
+  # prompt_template = os.path.join(BASE_PROMPT_PATH,"persona/prompt_template/v2/summarize_chat_ideas_v1.txt"
   # prompt_input = create_prompt_input(persona, target_persona, statements, curr_context)
   # prompt = generate_prompt(prompt_input, prompt_template)
 
@@ -2399,7 +2387,7 @@ def run_gpt_prompt_agent_chat_summarize_relationship(persona, target_persona, st
   gpt_param = {"engine": llm_config["model"], "max_tokens": 15, 
                "temperature": 0, "top_p": 1, "stream": False,
                "frequency_penalty": 0, "presence_penalty": 0, "stop": None}
-  prompt_template = "persona/prompt_template/v3_ChatGPT/summarize_chat_relationship_v2.txt" ########
+  prompt_template = os.path.join(BASE_PROMPT_PATH,"persona/prompt_template/v3_ChatGPT/summarize_chat_relationship_v2.txt") ########
   prompt_input = create_prompt_input(persona, target_persona, statements)  ########
   prompt = generate_prompt(prompt_input, prompt_template)
   example_output = 'Jane Doe is working on a project' ########
@@ -2415,7 +2403,7 @@ def run_gpt_prompt_agent_chat_summarize_relationship(persona, target_persona, st
   # gpt_param = {"engine": llm_config["model"], "max_tokens": 150, 
   #              "temperature": 0.5, "top_p": 1, "stream": False,
   #              "frequency_penalty": 0, "presence_penalty": 0, "stop": None}
-  # prompt_template = "persona/prompt_template/v2/summarize_chat_relationship_v1.txt"
+  # prompt_template = os.path.join(BASE_PROMPT_PATH,"persona/prompt_template/v2/summarize_chat_relationship_v1.txt"
   # prompt_input = create_prompt_input(persona, target_persona, statements)
   # prompt = generate_prompt(prompt_input, prompt_template)
 
@@ -2527,7 +2515,7 @@ def run_gpt_prompt_agent_chat(maze, persona, target_persona,
   gpt_param = {"engine": llm_config["model"], "max_tokens": 15, 
                "temperature": 0, "top_p": 1, "stream": False,
                "frequency_penalty": 0, "presence_penalty": 0, "stop": None}
-  prompt_template = "persona/prompt_template/v3_ChatGPT/agent_chat_v1.txt" ########
+  prompt_template = os.path.join(BASE_PROMPT_PATH,"persona/prompt_template/v3_ChatGPT/agent_chat_v1.txt") ########
   prompt_input = create_prompt_input(persona, target_persona, curr_context, init_summ_idea, target_summ_idea)  ########
   prompt = generate_prompt(prompt_input, prompt_template)
   example_output = '[["Jane Doe", "Hi!"], ["John Doe", "Hello there!"] ... ]' ########
@@ -2548,7 +2536,7 @@ def run_gpt_prompt_agent_chat(maze, persona, target_persona,
   # gpt_param = {"engine": llm_config["model"], "max_tokens": 2000, 
   #              "temperature": 0.7, "top_p": 1, "stream": False,
   #              "frequency_penalty": 0, "presence_penalty": 0, "stop": None}
-  # prompt_template = "persona/prompt_template/v2/agent_chat_v1.txt"
+  # prompt_template = os.path.join(BASE_PROMPT_PATH,"persona/prompt_template/v2/agent_chat_v1.txt"
   # prompt_input = create_prompt_input(persona, target_persona, curr_context, init_summ_idea, target_summ_idea)
   # prompt = generate_prompt(prompt_input, prompt_template)
 
@@ -2608,7 +2596,7 @@ def run_gpt_prompt_summarize_ideas(persona, statements, question, test_input=Non
   gpt_param = {"engine": llm_config["model"], "max_tokens": 15, 
                "temperature": 0, "top_p": 1, "stream": False,
                "frequency_penalty": 0, "presence_penalty": 0, "stop": None}
-  prompt_template = "persona/prompt_template/v3_ChatGPT/summarize_ideas_v1.txt" ########
+  prompt_template = os.path.join(BASE_PROMPT_PATH,"persona/prompt_template/v3_ChatGPT/summarize_ideas_v1.txt") ########
   prompt_input = create_prompt_input(persona, statements, question)  ########
   prompt = generate_prompt(prompt_input, prompt_template)
   example_output = 'Jane Doe is working on a project' ########
@@ -2624,7 +2612,7 @@ def run_gpt_prompt_summarize_ideas(persona, statements, question, test_input=Non
   # gpt_param = {"engine": llm_config["model"], "max_tokens": 150, 
   #              "temperature": 0.5, "top_p": 1, "stream": False,
   #              "frequency_penalty": 0, "presence_penalty": 0, "stop": None}
-  # prompt_template = "persona/prompt_template/v2/summarize_ideas_v1.txt"
+  # prompt_template = os.path.join(BASE_PROMPT_PATH,"persona/prompt_template/v2/summarize_ideas_v1.txt"
   # prompt_input = create_prompt_input(persona, statements, question)
   # prompt = generate_prompt(prompt_input, prompt_template)
 
@@ -2682,7 +2670,7 @@ def run_gpt_prompt_generate_next_convo_line(persona, interlocutor_desc, prev_con
   # gpt_param = {"engine": llm_config["model"], "max_tokens": 15, 
   #              "temperature": 0, "top_p": 1, "stream": False,
   #              "frequency_penalty": 0, "presence_penalty": 0, "stop": None}
-  # prompt_template = "persona/prompt_template/v3_ChatGPT/generate_next_convo_line_v1.txt" ########
+  # prompt_template = os.path.join(BASE_PROMPT_PATH,"persona/prompt_template/v3_ChatGPT/generate_next_convo_line_v1.txt" ########
   # prompt_input = create_prompt_input(persona, interlocutor_desc, prev_convo, retrieved_summary)  ########
   # prompt = generate_prompt(prompt_input, prompt_template)
   # example_output = 'Hello' ########
@@ -2699,7 +2687,7 @@ def run_gpt_prompt_generate_next_convo_line(persona, interlocutor_desc, prev_con
   gpt_param = {"engine": llm_config["model"], "max_tokens": 250, 
                "temperature": 1, "top_p": 1, "stream": False,
                "frequency_penalty": 0, "presence_penalty": 0, "stop": None}
-  prompt_template = "persona/prompt_template/v2/generate_next_convo_line_v1.txt"
+  prompt_template = os.path.join(BASE_PROMPT_PATH,"persona/prompt_template/v2/generate_next_convo_line_v1.txt")
   prompt_input = create_prompt_input(persona, interlocutor_desc, prev_convo, retrieved_summary)
   prompt = generate_prompt(prompt_input, prompt_template)
 
@@ -2739,7 +2727,7 @@ def run_gpt_prompt_generate_whisper_inner_thought(persona, whisper, test_input=N
   gpt_param = {"engine": llm_config["model"], "max_tokens": 50, 
                "temperature": 0, "top_p": 1, "stream": False,
                "frequency_penalty": 0, "presence_penalty": 0, "stop": None}
-  prompt_template = "persona/prompt_template/v2/whisper_inner_thought_v1.txt"
+  prompt_template = os.path.join(BASE_PROMPT_PATH,"persona/prompt_template/v2/whisper_inner_thought_v1.txt")
   prompt_input = create_prompt_input(persona, whisper)
   prompt = generate_prompt(prompt_input, prompt_template)
 
@@ -2776,7 +2764,7 @@ def run_gpt_prompt_planning_thought_on_convo(persona, all_utt, test_input=None, 
   gpt_param = {"engine": llm_config["model"], "max_tokens": 50, 
                "temperature": 0, "top_p": 1, "stream": False,
                "frequency_penalty": 0, "presence_penalty": 0, "stop": None}
-  prompt_template = "persona/prompt_template/v2/planning_thought_on_convo_v1.txt"
+  prompt_template = os.path.join(BASE_PROMPT_PATH,"persona/prompt_template/v2/planning_thought_on_convo_v1.txt")
   prompt_input = create_prompt_input(persona, all_utt)
   prompt = generate_prompt(prompt_input, prompt_template)
 
@@ -2827,7 +2815,7 @@ def run_gpt_prompt_memo_on_convo(persona, all_utt, test_input=None, verbose=Fals
   gpt_param = {"engine": llm_config["model"], "max_tokens": 15, 
                "temperature": 0, "top_p": 1, "stream": False,
                "frequency_penalty": 0, "presence_penalty": 0, "stop": None}
-  prompt_template = "persona/prompt_template/v3_ChatGPT/memo_on_convo_v1.txt" ########
+  prompt_template = os.path.join(BASE_PROMPT_PATH,"persona/prompt_template/v3_ChatGPT/memo_on_convo_v1.txt") ########
   prompt_input = create_prompt_input(persona, all_utt)  ########
   prompt = generate_prompt(prompt_input, prompt_template)
   example_output = 'Jane Doe was interesting to talk to.' ########
@@ -2842,7 +2830,7 @@ def run_gpt_prompt_memo_on_convo(persona, all_utt, test_input=None, verbose=Fals
   gpt_param = {"engine": llm_config["model"], "max_tokens": 50, 
                "temperature": 0, "top_p": 1, "stream": False,
                "frequency_penalty": 0, "presence_penalty": 0, "stop": None}
-  prompt_template = "persona/prompt_template/v2/memo_on_convo_v1.txt"
+  prompt_template = os.path.join(BASE_PROMPT_PATH,"persona/prompt_template/v2/memo_on_convo_v1.txt")
   prompt_input = create_prompt_input(persona, all_utt)
   prompt = generate_prompt(prompt_input, prompt_template)
 
@@ -2883,7 +2871,7 @@ def run_gpt_generate_safety_score(persona, comment, test_input=None, verbose=Fal
     return None
 
   print ("11")
-  prompt_template = "persona/prompt_template/safety/anthromorphosization_v1.txt" 
+  prompt_template = os.path.join(BASE_PROMPT_PATH,"persona/prompt_template/safety/anthromorphosization_v1.txt")
   prompt_input = create_prompt_input(comment) 
   print ("22")
   prompt = generate_prompt(prompt_input, prompt_template)
@@ -2998,7 +2986,7 @@ def run_gpt_generate_iterative_chat_utt(maze, init_persona, target_persona, retr
     return cleaned_dict
 
   print ("11")
-  prompt_template = "persona/prompt_template/v3_ChatGPT/iterative_convo_v1.txt" 
+  prompt_template = os.path.join(BASE_PROMPT_PATH,"persona/prompt_template/v3_ChatGPT/iterative_convo_v1.txt") 
   prompt_input = create_prompt_input(maze, init_persona, target_persona, retrieved, curr_context, curr_chat) 
   print ("22")
   prompt = generate_prompt(prompt_input, prompt_template)

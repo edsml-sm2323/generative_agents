@@ -1,0 +1,28 @@
+version: '3'
+
+services:
+  django:
+    build: .
+    container_name: generative_agents
+    volumes:
+      - .:/app
+    expose:
+      - "8000"  # Nginx 访问的端口，暴露给内部网络
+    networks:
+      - backend
+
+  nginx:
+    image: nginx:latest
+    container_name: nginx
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+    ports:
+      - "80:80"  # 映射到主机的 80 端口
+    depends_on:
+      - django
+    networks:
+      - backend
+
+networks:
+  backend:
+    driver: bridge
